@@ -1,4 +1,3 @@
-"use client";
 import { useState, useEffect } from "react";
 
 // TSW Coach Landing Page
@@ -12,13 +11,13 @@ const DEEP_FOREST = "#0D2818";
 const SOFT_GOLD = "#C5A55A";
 const MUTED_TEAL = "#5BA68A";
 
-export default function Home() {
- 
+export default function LandingPage() {
+  const [scrollY, setScrollY] = useState(0);
   const [showNav, setShowNav] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-     
+      setScrollY(window.scrollY);
       setShowNav(window.scrollY > 60);
     };
     window.addEventListener("scroll", handleScroll);
