@@ -26,8 +26,13 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPanic, setShowPanic] = useState(false);
+  const [breathPhase, setBreathPhase] = useState("ready");
+  const [breathCount, setBreathCount] = useState(0);
+  const [breathText, setBreathText] = useState("Tap to begin");
+  const [breathActive, setBreathActive] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const breathTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -36,6 +41,81 @@ export default function Chat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    return () => {
+      if (breathTimerRef.current) clearTimeout(breathTimerRef.current);
+    };
+  }, []);
+
+  const startBreathing = () => {
+    if (breathActive) return;
+    setBreathActive(true);
+    runBreathCycle(0);
+  };
+
+  const runBreathCycle = (count: number) => {
+    // Breathe in - 4 seconds
+    setBreathPhase("in");
+    setBreathText("Breathe in...");
+
+    breathTimerRef.current = setTimeout(() => {
+      // Hold - 4 seconds
+      setBreathPhase("hold");
+      setBreathText("Hold...");
+
+      breathTimerRef.current = setTimeout(() => {
+        // Breathe out - 4 seconds
+        setBreathPhase("out");
+        setBreathText("Breathe out...");
+
+        breathTimerRef.current = setTimeout(() => {
+          const newCount = count + 1;
+          setBreathCount(newCount);
+
+          // Burst — circle grows big with golden flash
+          setBreathPhase("burst");
+          setBreathText("");
+
+          breathTimerRef.current = setTimeout(() => {
+            // Dissolve — circle slowly fades out
+            setBreathPhase("dissolve");
+
+            breathTimerRef.current = setTimeout(() => {
+              if (newCount < 5) {
+                // Gently reform as a small circle
+                setBreathPhase("reform");
+                breathTimerRef.current = setTimeout(() => {
+                  // Settle before next cycle begins
+                  setBreathPhase("ready");
+                  breathTimerRef.current = setTimeout(() => {
+                    runBreathCycle(newCount);
+                  }, 400);
+                }, 1000);
+              } else {
+                setBreathPhase("done");
+                setBreathText("You made it through. I\u2019m proud of you.");
+                setBreathActive(false);
+              }
+            }, 1200);
+          }, 700);
+        }, 4000);
+      }, 4000);
+    }, 4000);
+  };
+
+  const resetBreathing = () => {
+    if (breathTimerRef.current) clearTimeout(breathTimerRef.current);
+    setBreathPhase("ready");
+    setBreathCount(0);
+    setBreathText("Tap to begin");
+    setBreathActive(false);
+  };
+
+  const handleClosePanic = () => {
+    resetBreathing();
+    setShowPanic(false);
+  };
 
   const handleSend = async () => {
     if (input.trim() === "" || isLoading) return;
@@ -61,7 +141,7 @@ export default function Chat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: chatHistory,
-          userProfile: null, // TODO: Pass real profile from Supabase
+          userProfile: null,
         }),
       });
 
@@ -101,6 +181,45 @@ export default function Chat() {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const getCircleSize = () => {
+    switch (breathPhase) {
+      case "in": return 200;
+      case "hold": return 200;
+      case "out": return 100;
+      case "burst": return 240;
+      case "dissolve": return 260;
+      case "reform": return 60;
+      case "done": return 160;
+      default: return 120;
+    }
+  };
+
+  const getCircleGradient = () => {
+    switch (breathPhase) {
+      case "in": return "radial-gradient(circle, #F8B4C8 0%, #E88FAA 40%, #D4728E 100%)";
+      case "hold": return "radial-gradient(circle, #F8C4D4 0%, #E8A0B8 40%, #D4889E 100%)";
+      case "out": return "radial-gradient(circle, #E8D4DC 0%, #D4B8C4 40%, #C49CAC 100%)";
+      case "burst": return "radial-gradient(circle, #FFD700 0%, #FFC044 30%, #F8B4C8 70%, #E88FAA 100%)";
+      case "dissolve": return "radial-gradient(circle, rgba(255,215,0,0) 0%, rgba(248,180,200,0) 100%)";
+      case "reform": return "radial-gradient(circle, #F0D4DE 0%, #E8B8C8 40%, #D49CAE 100%)";
+      case "done": return "radial-gradient(circle, #98E8B0 0%, #5BA68A 40%, #1B6B4A 100%)";
+      default: return "radial-gradient(circle, #F0D4DE 0%, #E8B8C8 40%, #D49CAE 100%)";
+    }
+  };
+
+  const getCircleGlow = () => {
+    switch (breathPhase) {
+      case "in": return "0 0 40px rgba(232,143,170,0.5), 0 0 80px rgba(232,143,170,0.2)";
+      case "hold": return "0 0 50px rgba(232,160,184,0.5), 0 0 100px rgba(232,160,184,0.25)";
+      case "out": return "0 0 30px rgba(212,184,196,0.4)";
+      case "burst": return "0 0 80px rgba(255,215,0,0.7), 0 0 160px rgba(255,192,68,0.3)";
+      case "dissolve": return "0 0 0px rgba(0,0,0,0)";
+      case "reform": return "0 0 10px rgba(232,184,200,0.2)";
+      case "done": return "0 0 50px rgba(91,166,138,0.5), 0 0 100px rgba(27,107,74,0.2)";
+      default: return "0 0 20px rgba(232,184,200,0.3)";
     }
   };
 
@@ -179,81 +298,194 @@ export default function Chat() {
         .panic-overlay {
           position: fixed;
           top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(13,40,24,0.85);
-          backdrop-filter: blur(10px);
+          background: rgba(10,10,15,0.92);
+          backdrop-filter: blur(16px);
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 200;
-          animation: fadeIn 0.3s ease;
+          animation: fadeIn 0.4s ease;
         }
         .panic-card {
-          background: white;
-          border-radius: 24px;
-          padding: 48px;
-          max-width: 480px;
+          background: #1A1A2E;
+          border-radius: 28px;
+          padding: 48px 40px;
+          max-width: 440px;
           width: 90%;
           text-align: center;
         }
-        .breathing-circle {
-          width: 120px;
-          height: 120px;
+        .breath-circle {
           border-radius: 50%;
-          background: linear-gradient(145deg, #E8F5EC, #D4E8D9);
-          margin: 0 auto 24px;
           display: flex;
           align-items: center;
           justify-content: center;
-          animation: breathe 8s ease-in-out infinite;
+          margin: 0 auto 28px;
+          cursor: pointer;
+          transition: width 4s ease-in-out, height 4s ease-in-out, background 2s ease, box-shadow 2s ease, opacity 1s ease;
         }
-        @keyframes breathe {
-          0%, 100% { transform: scale(1); }
-          25% { transform: scale(1.3); }
-          50% { transform: scale(1.3); }
-          75% { transform: scale(1); }
+        .breath-circle.burst-phase {
+          transition: width 0.5s ease-out, height 0.5s ease-out, background 0.4s ease, box-shadow 0.4s ease, opacity 0.1s ease;
+        }
+        .breath-circle.dissolve-phase {
+          transition: width 1.2s ease-in, height 1.2s ease-in, background 1s ease, box-shadow 1s ease, opacity 1.2s ease-in;
+          opacity: 0;
+        }
+        .breath-circle.reform-phase {
+          transition: width 1s ease-out, height 1s ease-out, background 1s ease, box-shadow 1s ease, opacity 1s ease-out;
+          opacity: 1;
+        }
+        .progress-dots {
+          display: flex;
+          gap: 8px;
+          justify-content: center;
+          margin-bottom: 24px;
+        }
+        .progress-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          transition: all 0.3s ease;
+        }
+        @keyframes sparkle {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.2); opacity: 0.8; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        .sparkle-text {
+          animation: sparkle 0.6s ease;
         }
       `}</style>
 
+      {/* PANIC MODE OVERLAY */}
       {showPanic && (
-        <div className="panic-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowPanic(false); }}>
+        <div className="panic-overlay">
           <div className="panic-card">
-            <div className="breathing-circle">
-              <span style={{ fontSize: 32 }}>🫁</span>
+            {/* Breathing circle */}
+            <div
+              className={`breath-circle ${breathPhase === "burst" ? "burst-phase" : breathPhase === "dissolve" ? "dissolve-phase" : breathPhase === "reform" ? "reform-phase" : ""}`}
+              style={{
+                width: getCircleSize(),
+                height: getCircleSize(),
+                background: getCircleGradient(),
+                boxShadow: getCircleGlow(),
+              }}
+              onClick={!breathActive ? startBreathing : undefined}
+            >
+              <span style={{
+                fontSize: 28,
+                opacity: breathPhase === "dissolve" ? 0 : 1,
+                transition: "opacity 0.5s ease",
+              }}>
+                {breathPhase === "done" ? "\uD83D\uDC9A" : "\uD83E\uDEC1"}
+              </span>
             </div>
-            <h2 style={{ fontFamily: "'Lora', Georgia, serif", fontSize: 24, fontWeight: 600, marginBottom: 12, color: DEEP_FOREST }}>
-              Breathe with me
+
+            {/* Breath instruction text */}
+            <h2 style={{
+              fontFamily: "'Lora', Georgia, serif",
+              fontSize: breathPhase === "done" ? 22 : 26,
+              fontWeight: 600,
+              marginBottom: 8,
+              color: "white",
+              transition: "color 0.3s ease",
+              opacity: breathPhase === "burst" || breathPhase === "dissolve" || breathPhase === "reform" ? 0 : 1,
+            }}>
+              {breathText}
             </h2>
-            <p style={{ fontSize: 16, color: "#6B7D73", lineHeight: 1.7, marginBottom: 8 }}>
-              Follow the circle. Breathe in as it grows, out as it shrinks.
+
+            {/* Subtext */}
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 24, opacity: breathPhase === "burst" || breathPhase === "dissolve" || breathPhase === "reform" ? 0 : 1, transition: "opacity 0.3s ease" }}>
+              {breathPhase === "ready" && "5 breaths. You can do this."}
+              {breathPhase === "in" && "4 seconds... fill your lungs slowly"}
+              {breathPhase === "hold" && "4 seconds... you\u2019re doing great"}
+              {breathPhase === "out" && "4 seconds... let it all go"}
+              {breathPhase === "done" && ""}
             </p>
-            <p style={{ fontSize: 14, color: MUTED_TEAL, marginBottom: 24 }}>
-              4 seconds in... hold 4 seconds... 4 seconds out...
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
-              <p style={{ fontSize: 15, color: "#4A5D52", fontWeight: 600 }}>You are safe. This will pass.</p>
+
+            {/* Progress dots */}
+            <div className="progress-dots">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="progress-dot"
+                  style={{
+                    background: i < breathCount
+                      ? "linear-gradient(135deg, #FFD700, #F8B4C8)"
+                      : "rgba(255,255,255,0.15)",
+                    boxShadow: i < breathCount ? "0 0 8px rgba(255,215,0,0.5)" : "none",
+                    transform: i === breathCount - 1 && breathPhase === "burst" ? "scale(1.4)" : "scale(1)",
+                  }}
+                />
+              ))}
             </div>
+
+            {/* Safety message */}
+            <p style={{
+              fontSize: 16,
+              color: "rgba(255,255,255,0.7)",
+              fontWeight: 500,
+              marginBottom: 28,
+              fontStyle: "italic",
+            }}>
+              You are safe. This will pass.
+            </p>
+
+            {/* Action buttons */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <a href="tel:988" style={{ display: "block", padding: "14px", background: "#E8534A", color: "white", borderRadius: 12, fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
-                Call 988 — Crisis Lifeline
+              <a href="tel:988" style={{
+                display: "block",
+                padding: "14px",
+                background: "linear-gradient(135deg, #E8534A, #D4403A)",
+                color: "white",
+                borderRadius: 14,
+                fontWeight: 600,
+                fontSize: 15,
+                textDecoration: "none",
+                fontFamily: "'DM Sans', sans-serif",
+              }}>
+                Call 988 \u2014 Crisis Lifeline
               </a>
-              <a href="sms:741741&body=HELLO" style={{ display: "block", padding: "14px", background: SAGE_LIGHT, color: DEEP_FOREST, borderRadius: 12, fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
+              <a href="sms:741741&body=HELLO" style={{
+                display: "block",
+                padding: "14px",
+                background: "rgba(255,255,255,0.08)",
+                color: "white",
+                borderRadius: 14,
+                fontWeight: 600,
+                fontSize: 15,
+                textDecoration: "none",
+                fontFamily: "'DM Sans', sans-serif",
+                border: "1px solid rgba(255,255,255,0.15)",
+              }}>
                 Text HOME to 741741
               </a>
               <button
-                onClick={() => setShowPanic(false)}
-                style={{ padding: "14px", background: "transparent", border: "2px solid #D4E8D9", borderRadius: 12, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 15, color: MUTED_TEAL, cursor: "pointer" }}
+                onClick={handleClosePanic}
+                style={{
+                  padding: "14px",
+                  background: "transparent",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 14,
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontWeight: 600,
+                  fontSize: 15,
+                  color: "rgba(255,255,255,0.4)",
+                  cursor: "pointer",
+                  marginTop: 4,
+                }}
               >
-                I&apos;m feeling better — close
+                I&apos;m feeling better \u2014 close
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* HEADER */}
       <div style={{ padding: "16px 24px", borderBottom: "1px solid rgba(27,107,74,0.1)", background: "rgba(253,248,240,0.95)", backdropFilter: "blur(20px)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 36, height: 36, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ color: "white", fontSize: 18 }}>✦</span>
+            <span style={{ color: "white", fontSize: 18 }}>{"\u2726"}</span>
           </div>
           <div>
             <div style={{ fontWeight: 700, fontSize: 16, color: DEEP_FOREST }}>BALM</div>
@@ -262,11 +494,12 @@ export default function Chat() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <button className="panic-btn" onClick={() => setShowPanic(true)}>
-            🆘 Panic Button
+            {"\uD83C\uDD98"} Panic Button
           </button>
         </div>
       </div>
 
+      {/* MESSAGES */}
       <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 16 }}>
         {messages.map((msg) => (
           <div
@@ -280,7 +513,7 @@ export default function Chat() {
           >
             {msg.role === "assistant" && (
               <div style={{ width: 28, height: 28, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <span style={{ color: "white", fontSize: 12 }}>✦</span>
+                <span style={{ color: "white", fontSize: 12 }}>{"\u2726"}</span>
               </div>
             )}
             <div
@@ -293,7 +526,7 @@ export default function Chat() {
                 boxShadow: msg.role === "assistant" ? "0 2px 8px rgba(13,40,24,0.04)" : "none",
               }}
             >
-              {msg.content}
+              <span dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>") }} />
             </div>
           </div>
         ))}
@@ -301,7 +534,7 @@ export default function Chat() {
         {isLoading && (
           <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
             <div style={{ width: 28, height: 28, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <span style={{ color: "white", fontSize: 12 }}>✦</span>
+              <span style={{ color: "white", fontSize: 12 }}>{"\u2726"}</span>
             </div>
             <div className="message-bubble" style={{ background: "white", padding: "16px 24px", boxShadow: "0 2px 8px rgba(13,40,24,0.04)" }}>
               <div className="typing-indicator">
@@ -314,6 +547,7 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* INPUT */}
       <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(27,107,74,0.1)", background: "rgba(253,248,240,0.95)" }}>
         <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", alignItems: "flex-end", gap: 12, background: "white", borderRadius: 16, padding: "12px 16px", border: "2px solid #D4E8D9" }}>
           <textarea
