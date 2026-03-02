@@ -19,7 +19,7 @@ export default function Chat() {
     {
       id: "welcome",
       role: "assistant",
-      content: "Hi there. I'm BALM — your companion through TSW. I'm here whenever you need to talk, ask questions, or just have someone who understands. How are you doing today?",
+      content: "Hi there. I\u2019m BALM \u2014 your companion through TSW. I\u2019m here whenever you need to talk, ask questions, or just have someone who understands. How are you doing today?",
       timestamp: new Date(),
     },
   ]);
@@ -51,18 +51,50 @@ export default function Chat() {
     setInput("");
     setIsLoading(true);
 
-    // TODO: Replace with actual Claude API call
-    // For now, simulate BALM response
-    setTimeout(() => {
-      const balmResponse: Message = {
+    try {
+      const chatHistory = [...messages, userMessage]
+        .filter((m) => m.id !== "welcome" || m.role === "assistant")
+        .map((m) => ({ role: m.role, content: m.content }));
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: chatHistory,
+          userProfile: null, // TODO: Pass real profile from Supabase
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const balmResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: data.message,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, balmResponse]);
+      } else {
+        const errorResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "I\u2019m having a moment \u2014 something went wrong on my end. Can you try saying that again?",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, errorResponse]);
+      }
+    } catch {
+      const errorResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: getBalmResponse(userMessage.content),
+        content: "I\u2019m having trouble connecting right now. Please check your internet and try again.",
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, balmResponse]);
+      setMessages((prev) => [...prev, errorResponse]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -70,30 +102,6 @@ export default function Chat() {
       e.preventDefault();
       handleSend();
     }
-  };
-
-  // Temporary placeholder responses until Claude API is connected
-  const getBalmResponse = (userInput: string): string => {
-    const lower = userInput.toLowerCase();
-    if (lower.includes("itch") || lower.includes("scratch")) {
-      return "I know the itching can feel unbearable. You're not weak for struggling with it — it's one of the hardest parts of TSW. Have you tried a cold compress or running cool water over the area? Sometimes distraction helps too. What usually gives you even a little relief?";
-    }
-    if (lower.includes("sleep") || lower.includes("can't sleep") || lower.includes("insomnia")) {
-      return "Sleep deprivation makes everything harder. Your body is working so hard to heal, and not being able to rest feels cruel. A few things that some people find helpful: keeping the room cool, cotton sheets, and a consistent wind-down routine. Would you like to talk about what's keeping you up?";
-    }
-    if (lower.includes("give up") || lower.includes("can't do this") || lower.includes("hopeless")) {
-      return "I hear you. This is one of the hardest things a person can go through, and feeling overwhelmed doesn't mean you're failing — it means you're human. You've already shown incredible strength by being here. Can you tell me more about what's hitting hardest right now?";
-    }
-    if (lower.includes("steroid") || lower.includes("cream") || lower.includes("ointment")) {
-      return "⚠️ STEROID ALERT: I want to make sure you always know exactly what's going on with any product. Can you tell me the specific product name or active ingredient? I'll let you know if it contains corticosteroids so you can make an informed decision.";
-    }
-    if (lower.includes("doctor") || lower.includes("derm") || lower.includes("appointment")) {
-      return "Dealing with doctors who don't understand TSW is incredibly frustrating. You deserve to be heard. Would you like help preparing for your next appointment? I can help you organize your symptoms, timeline, and questions to bring with you.";
-    }
-    if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
-      return "Hey! I'm glad you're here. How are you doing today — really? You don't have to put on a brave face with me.";
-    }
-    return "Thank you for sharing that with me. I'm listening, and I want to understand what you're going through. Can you tell me more about how you're feeling right now?";
   };
 
   return (
@@ -149,6 +157,7 @@ export default function Chat() {
           line-height: 1.7;
           font-size: 15px;
           animation: fadeIn 0.3s ease;
+          white-space: pre-wrap;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .typing-indicator span {
@@ -203,18 +212,8 @@ export default function Chat() {
           50% { transform: scale(1.3); }
           75% { transform: scale(1); }
         }
-        .nav-link {
-          font-size: 14px;
-          color: #5BA68A;
-          text-decoration: none;
-          font-weight: 600;
-          cursor: pointer;
-          transition: color 0.2s;
-        }
-        .nav-link:hover { color: #1B6B4A; }
       `}</style>
 
-      {/* PANIC MODE OVERLAY */}
       {showPanic && (
         <div className="panic-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowPanic(false); }}>
           <div className="panic-card">
@@ -230,11 +229,9 @@ export default function Chat() {
             <p style={{ fontSize: 14, color: MUTED_TEAL, marginBottom: 24 }}>
               4 seconds in... hold 4 seconds... 4 seconds out...
             </p>
-
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
               <p style={{ fontSize: 15, color: "#4A5D52", fontWeight: 600 }}>You are safe. This will pass.</p>
             </div>
-
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <a href="tel:988" style={{ display: "block", padding: "14px", background: "#E8534A", color: "white", borderRadius: 12, fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
                 Call 988 — Crisis Lifeline
@@ -244,7 +241,7 @@ export default function Chat() {
               </a>
               <button
                 onClick={() => setShowPanic(false)}
-                style={{ padding: "14px", background: "transparent", border: `2px solid #D4E8D9`, borderRadius: 12, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 15, color: MUTED_TEAL, cursor: "pointer" }}
+                style={{ padding: "14px", background: "transparent", border: "2px solid #D4E8D9", borderRadius: 12, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 15, color: MUTED_TEAL, cursor: "pointer" }}
               >
                 I&apos;m feeling better — close
               </button>
@@ -253,7 +250,6 @@ export default function Chat() {
         </div>
       )}
 
-      {/* HEADER */}
       <div style={{ padding: "16px 24px", borderBottom: "1px solid rgba(27,107,74,0.1)", background: "rgba(253,248,240,0.95)", backdropFilter: "blur(20px)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 36, height: 36, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -271,7 +267,6 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* MESSAGES */}
       <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 16 }}>
         {messages.map((msg) => (
           <div
@@ -303,7 +298,6 @@ export default function Chat() {
           </div>
         ))}
 
-        {/* Typing indicator */}
         {isLoading && (
           <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
             <div style={{ width: 28, height: 28, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -320,7 +314,6 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* INPUT */}
       <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(27,107,74,0.1)", background: "rgba(253,248,240,0.95)" }}>
         <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", alignItems: "flex-end", gap: 12, background: "white", borderRadius: 16, padding: "12px 16px", border: "2px solid #D4E8D9" }}>
           <textarea
