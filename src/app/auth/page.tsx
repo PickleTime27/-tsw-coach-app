@@ -117,4 +117,3 @@ function AuthContent() {
 }
 export default function Auth() { return <Suspense><AuthContent /></Suspense>; }
 
-export default function Auth() { return <Suspense><AuthContent /></Suspense>; }
