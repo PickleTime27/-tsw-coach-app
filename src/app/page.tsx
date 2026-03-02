@@ -188,8 +188,8 @@ export default function Home() {
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 18, color: DEEP_FOREST }}>TSW Coach</span>
           </div>
           <div style={{ display: "flex", gap: 12 }}>
-            <button className="btn-secondary" style={{ padding: "10px 24px", fontSize: 14 }}>Log In</button>
-            <button className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }}>Get Started Free</button>
+            <button className="btn-secondary" style={{ padding: "10px 24px", fontSize: 14 }} onClick={() => window.location.href="/auth"}>Log In</button>
+            <button className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }} onClick={() => window.location.href="/auth"}>Get Started Free</button>
           </div>
         </div>
       )}
@@ -207,8 +207,8 @@ export default function Home() {
           <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
             <a href="#about" className="hide-mobile" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: DEEP_FOREST, textDecoration: "none", opacity: 0.7 }}>About</a>
             <a href="#features" className="hide-mobile" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: DEEP_FOREST, textDecoration: "none", opacity: 0.7 }}>Features</a>
-            <button className="btn-secondary" style={{ padding: "10px 24px", fontSize: 14 }}>Log In</button>
-            <button className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }}>Get Started</button>
+            <button className="btn-secondary" style={{ padding: "10px 24px", fontSize: 14 }} onClick={() => window.location.href="/auth"}>Log In</button>
+            <button className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }} onClick={() => window.location.href="/auth"}>Get Started</button>
           </div>
         </div>
 
@@ -254,7 +254,7 @@ export default function Home() {
               </p>
 
               <div className="fade-in fade-in-delay-3" style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-                <button className="btn-primary">Start Your Journey — Free</button>
+                <button className="btn-primary" onClick={() => window.location.href="/auth"}>Start Your Journey — Free</button>
                 <button className="btn-secondary">Learn More ↓</button>
               </div>
 
@@ -489,7 +489,7 @@ export default function Home() {
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, color: "rgba(255,255,255,0.8)", lineHeight: 1.7, marginBottom: 40 }}>
             BALM is here whenever you need — at 3am, after a bad doctor visit, on the good days and the hard ones.
           </p>
-          <button className="btn-primary" style={{ background: "white", color: BALM_GREEN, fontSize: 18, padding: "18px 48px" }}
+          <button className="btn-primary" style={{ background: "white", color: BALM_GREEN, fontSize: 18, padding: "18px 48px" }} onClick={() => window.location.href="/auth"}
             onMouseOver={(e) => { e.target.style.background = WARM_CREAM; e.target.style.transform = "translateY(-2px)"; }}
             onMouseOut={(e) => { e.target.style.background = "white"; e.target.style.transform = "translateY(0)"; }}
           >

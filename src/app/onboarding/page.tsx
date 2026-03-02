@@ -356,12 +356,24 @@ export default function Onboarding() {
                       onChange={(e) => updateProfile("relationship", e.target.value)}
                     >
                       <option value="">What is your relationship?</option>
+                      <option value="">What is your relationship?</option>
                       <option value="partner">Partner / Spouse</option>
+                      <option value="parent">Parent (Mom / Dad)</option>
+                      <option value="child">Son / Daughter</option>
+                      <option value="sibling">Sibling (Brother / Sister)</option>
+                      <option value="grandparent">Grandparent</option>
+                      <option value="aunt_uncle">Aunt / Uncle</option>
+                      <option value="niece_nephew">Niece / Nephew</option>
+                      <option value="cousin">Cousin</option>
                       <option value="friend">Friend</option>
-                      <option value="sibling">Sibling</option>
-                      <option value="other_family">Other family member</option>
+                      <option value="coworker">Coworker</option>
                       <option value="other">Other</option>
-                    </select>
+
+
+
+
+
+
                   </div>
                 </>
               )}
