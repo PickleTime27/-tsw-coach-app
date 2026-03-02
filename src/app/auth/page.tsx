@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getProfile } from "@/lib/profile";
 import { supabase } from "@/lib/supabase";
 
 const BALM_GREEN = "#1B6B4A";
@@ -11,7 +12,7 @@ const MUTED_TEAL = "#5BA68A";
 
 export default function Auth() {
   const router = useRouter();
-  const [isLogin, setIsLogin] = useState(false);
+  const searchParams = useSearchParams(); const [isLogin, setIsLogin] = useState(searchParams.get("mode") === "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -27,7 +28,7 @@ export default function Auth() {
       if (error) {
         setError(error.message);
       } else {
-        router.push("/onboarding");
+        const profile = getProfile(); if (profile && profile.firstName) { router.push("/chat"); } else { router.push("/onboarding"); }
       }
     } else {
       const { error } = await supabase.auth.signUp({ email, password });
@@ -82,7 +83,7 @@ export default function Auth() {
             {isLogin ? "Welcome back" : "Join TSW Coach"}
           </h1>
           <p style={{ fontSize: 16, color: "#6B7D73" }}>
-            {isLogin ? "Sign in to continue your journey with BALM" : "Create your account to get started with BALM"}
+            
           </p>
         </div>
 

@@ -356,7 +356,6 @@ export default function Onboarding() {
                       onChange={(e) => updateProfile("relationship", e.target.value)}
                     >
                       <option value="">What is your relationship?</option>
-                      <option value="">What is your relationship?</option>
                       <option value="partner">Partner / Spouse</option>
                       <option value="parent">Parent (Mom / Dad)</option>
                       <option value="child">Son / Daughter</option>
@@ -368,6 +367,7 @@ export default function Onboarding() {
                       <option value="friend">Friend</option>
                       <option value="coworker">Coworker</option>
                       <option value="other">Other</option>
+                    </select>
 
 
 
