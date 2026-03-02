@@ -36,7 +36,7 @@ function AuthContent() {
       if (error) {
         setError(error.message);
       } else {
-        setConfirmSent(true);
+        router.push("/onboarding");
       }
     }
     setLoading(false);
