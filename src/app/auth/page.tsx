@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getProfile } from "@/lib/profile";
@@ -10,7 +11,7 @@ const WARM_CREAM = "#FDF8F0";
 const DEEP_FOREST = "#0D2818";
 const MUTED_TEAL = "#5BA68A";
 
-export default function Auth() {
+function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams(); const [isLogin, setIsLogin] = useState(searchParams.get("mode") === "login");
   const [email, setEmail] = useState("");
@@ -114,3 +115,6 @@ export default function Auth() {
     </div>
   );
 }
+export default function Auth() { return <Suspense><AuthContent /></Suspense>; }
+
+export default function Auth() { return <Suspense><AuthContent /></Suspense>; }
