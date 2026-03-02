@@ -1,4 +1,6 @@
 "use client";
+import { useRouter } from "next/navigation";
+import { saveProfile } from "@/lib/profile";
 import { useState } from "react";
 
 const BALM_GREEN = "#1B6B4A";
@@ -49,6 +51,7 @@ const TRADITIONS = [
 ];
 
 export default function Onboarding() {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<ProfileData>({
     firstName: "",
@@ -505,7 +508,7 @@ export default function Onboarding() {
                 className="btn-next"
                 onClick={() => {
                   // TODO: Save to Supabase and redirect to dashboard
-                  alert("Profile saved! Next step: connect to Supabase and redirect to dashboard.\n\n" + JSON.stringify(profile, null, 2));
+                  saveProfile(profile); router.push("/chat");
                 }}
               >
                 Meet BALM →

@@ -1,4 +1,5 @@
 "use client";
+import { getProfile } from "@/lib/profile";
 import { useState, useRef, useEffect } from "react";
 
 const BALM_GREEN = "#1B6B4A";
@@ -46,6 +47,12 @@ export default function Chat() {
     return () => {
       if (breathTimerRef.current) clearTimeout(breathTimerRef.current);
     };
+  }, []);
+  useEffect(() => {
+    const p = getProfile();
+    if (p && p.firstName) {
+      setMessages([{ id: "welcome", role: "assistant", content: "Hi " + p.firstName + "! I\u2019m BALM \u2014 your companion through TSW. I\u2019m here whenever you need to talk, ask questions, or just have someone who understands. How are you doing today?", timestamp: new Date() }]);
+    }
   }, []);
 
   const startBreathing = () => {
@@ -122,7 +129,7 @@ export default function Chat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: chatHistory,
-          userProfile: null,
+          userProfile: getProfile(),
         }),
       });
 
