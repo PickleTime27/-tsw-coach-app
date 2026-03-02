@@ -490,8 +490,8 @@ export default function Home() {
             BALM is here whenever you need — at 3am, after a bad doctor visit, on the good days and the hard ones.
           </p>
           <button className="btn-primary" style={{ background: "white", color: BALM_GREEN, fontSize: 18, padding: "18px 48px" }} onClick={() => window.location.href="/auth"}
-            onMouseOver={(e) => { e.target.style.background = WARM_CREAM; e.target.style.transform = "translateY(-2px)"; }}
-            onMouseOut={(e) => { e.target.style.background = "white"; e.target.style.transform = "translateY(0)"; }}
+            onMouseOver={(e) => { e.currentTarget.style.background = WARM_CREAM; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = "white"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
             Start Your Journey — Free
           </button>
