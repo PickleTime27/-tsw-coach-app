@@ -73,32 +73,13 @@ export default function Chat() {
           const newCount = count + 1;
           setBreathCount(newCount);
 
-          // Burst — circle grows big with golden flash
-          setBreathPhase("burst");
-          setBreathText("");
-
-          breathTimerRef.current = setTimeout(() => {
-            // Dissolve — circle slowly fades out
-            setBreathPhase("dissolve");
-
-            breathTimerRef.current = setTimeout(() => {
-              if (newCount < 5) {
-                // Gently reform as a small circle
-                setBreathPhase("reform");
-                breathTimerRef.current = setTimeout(() => {
-                  // Settle before next cycle begins
-                  setBreathPhase("ready");
-                  breathTimerRef.current = setTimeout(() => {
-                    runBreathCycle(newCount);
-                  }, 400);
-                }, 1000);
-              } else {
-                setBreathPhase("done");
-                setBreathText("You made it through. I\u2019m proud of you.");
-                setBreathActive(false);
-              }
-            }, 1200);
-          }, 700);
+          if (newCount < 5) {
+            runBreathCycle(newCount);
+          } else {
+            setBreathPhase("done");
+            setBreathText("You made it through. I\u2019m proud of you.");
+            setBreathActive(false);
+          }
         }, 4000);
       }, 4000);
     }, 4000);
@@ -189,9 +170,6 @@ export default function Chat() {
       case "in": return 200;
       case "hold": return 200;
       case "out": return 100;
-      case "burst": return 240;
-      case "dissolve": return 260;
-      case "reform": return 60;
       case "done": return 160;
       default: return 120;
     }
@@ -202,9 +180,6 @@ export default function Chat() {
       case "in": return "radial-gradient(circle, #F8B4C8 0%, #E88FAA 40%, #D4728E 100%)";
       case "hold": return "radial-gradient(circle, #F8C4D4 0%, #E8A0B8 40%, #D4889E 100%)";
       case "out": return "radial-gradient(circle, #E8D4DC 0%, #D4B8C4 40%, #C49CAC 100%)";
-      case "burst": return "radial-gradient(circle, #FFD700 0%, #FFC044 30%, #F8B4C8 70%, #E88FAA 100%)";
-      case "dissolve": return "radial-gradient(circle, rgba(255,215,0,0) 0%, rgba(248,180,200,0) 100%)";
-      case "reform": return "radial-gradient(circle, #F0D4DE 0%, #E8B8C8 40%, #D49CAE 100%)";
       case "done": return "radial-gradient(circle, #98E8B0 0%, #5BA68A 40%, #1B6B4A 100%)";
       default: return "radial-gradient(circle, #F0D4DE 0%, #E8B8C8 40%, #D49CAE 100%)";
     }
@@ -215,9 +190,6 @@ export default function Chat() {
       case "in": return "0 0 40px rgba(232,143,170,0.5), 0 0 80px rgba(232,143,170,0.2)";
       case "hold": return "0 0 50px rgba(232,160,184,0.5), 0 0 100px rgba(232,160,184,0.25)";
       case "out": return "0 0 30px rgba(212,184,196,0.4)";
-      case "burst": return "0 0 80px rgba(255,215,0,0.7), 0 0 160px rgba(255,192,68,0.3)";
-      case "dissolve": return "0 0 0px rgba(0,0,0,0)";
-      case "reform": return "0 0 10px rgba(232,184,200,0.2)";
       case "done": return "0 0 50px rgba(91,166,138,0.5), 0 0 100px rgba(27,107,74,0.2)";
       default: return "0 0 20px rgba(232,184,200,0.3)";
     }
@@ -321,18 +293,7 @@ export default function Chat() {
           justify-content: center;
           margin: 0 auto 28px;
           cursor: pointer;
-          transition: width 4s ease-in-out, height 4s ease-in-out, background 2s ease, box-shadow 2s ease, opacity 1s ease;
-        }
-        .breath-circle.burst-phase {
-          transition: width 0.5s ease-out, height 0.5s ease-out, background 0.4s ease, box-shadow 0.4s ease, opacity 0.1s ease;
-        }
-        .breath-circle.dissolve-phase {
-          transition: width 1.2s ease-in, height 1.2s ease-in, background 1s ease, box-shadow 1s ease, opacity 1.2s ease-in;
-          opacity: 0;
-        }
-        .breath-circle.reform-phase {
-          transition: width 1s ease-out, height 1s ease-out, background 1s ease, box-shadow 1s ease, opacity 1s ease-out;
-          opacity: 1;
+          transition: width 4s ease-in-out, height 4s ease-in-out, background 2s ease, box-shadow 2s ease;
         }
         .progress-dots {
           display: flex;
@@ -362,7 +323,7 @@ export default function Chat() {
           <div className="panic-card">
             {/* Breathing circle */}
             <div
-              className={`breath-circle ${breathPhase === "burst" ? "burst-phase" : breathPhase === "dissolve" ? "dissolve-phase" : breathPhase === "reform" ? "reform-phase" : ""}`}
+              className="breath-circle"
               style={{
                 width: getCircleSize(),
                 height: getCircleSize(),
@@ -371,11 +332,7 @@ export default function Chat() {
               }}
               onClick={!breathActive ? startBreathing : undefined}
             >
-              <span style={{
-                fontSize: 28,
-                opacity: breathPhase === "dissolve" ? 0 : 1,
-                transition: "opacity 0.5s ease",
-              }}>
+              <span style={{ fontSize: 28 }}>
                 {breathPhase === "done" ? "\uD83D\uDC9A" : "\uD83E\uDEC1"}
               </span>
             </div>
@@ -387,14 +344,12 @@ export default function Chat() {
               fontWeight: 600,
               marginBottom: 8,
               color: "white",
-              transition: "color 0.3s ease",
-              opacity: breathPhase === "burst" || breathPhase === "dissolve" || breathPhase === "reform" ? 0 : 1,
             }}>
               {breathText}
             </h2>
 
             {/* Subtext */}
-            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 24, opacity: breathPhase === "burst" || breathPhase === "dissolve" || breathPhase === "reform" ? 0 : 1, transition: "opacity 0.3s ease" }}>
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>
               {breathPhase === "ready" && "5 breaths. You can do this."}
               {breathPhase === "in" && "4 seconds... fill your lungs slowly"}
               {breathPhase === "hold" && "4 seconds... you\u2019re doing great"}
@@ -413,7 +368,7 @@ export default function Chat() {
                       ? "linear-gradient(135deg, #FFD700, #F8B4C8)"
                       : "rgba(255,255,255,0.15)",
                     boxShadow: i < breathCount ? "0 0 8px rgba(255,215,0,0.5)" : "none",
-                    transform: i === breathCount - 1 && breathPhase === "burst" ? "scale(1.4)" : "scale(1)",
+                    transform: "scale(1)",
                   }}
                 />
               ))}
@@ -474,7 +429,7 @@ export default function Chat() {
                   marginTop: 4,
                 }}
               >
-                I&apos;m feeling better \u2014 close
+                I&apos;m feeling better — return to BALM
               </button>
             </div>
           </div>
