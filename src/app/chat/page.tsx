@@ -33,6 +33,8 @@ export default function Chat() {
   const [breathText, setBreathText] = useState("Tap to begin");
   const [breathActive, setBreathActive] = useState(false);
   const [profileId, setProfileId] = useState<string | null>(null);
+  const [panicMode, setPanicMode] = useState("breathe");
+  const [groundStep, setGroundStep] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const breathTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -342,6 +344,8 @@ export default function Chat() {
       {showPanic && (
         <div className="panic-overlay">
           <div className="panic-card">
+            {/* MODE TOGGLE */}
+            {panicMode === "breathe" && <>
             {/* Breathing circle */}
             <div
               className="breath-circle"
@@ -395,6 +399,16 @@ export default function Chat() {
               ))}
             </div>
 
+            </>}
+            {panicMode === "ground" && <>
+            <div style={{ textAlign: "center" }}>
+              <span style={{ fontSize: 48 }}>{["👁️","✋","👂","👃","👅"][groundStep]}</span>
+              <h2 style={{ fontFamily: "Lora, Georgia, serif", fontSize: 24, fontWeight: 600, color: "white", marginTop: 16, marginBottom: 8 }}>{["Name 5 things you can SEE","Name 4 things you can TOUCH","Name 3 things you can HEAR","Name 2 things you can SMELL","Name 1 thing you can TASTE"][groundStep]}</h2>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>{["Look around slowly. What catches your eye?","Feel textures near you. What do you notice?","Close your eyes. What sounds surround you?","Breathe in. What scents are nearby?","What taste lingers in your mouth?"][groundStep]}</p>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 20 }}>{[5,4,3,2,1].map(function(n,i) { return <div key={i} style={{ width: 12, height: 12, borderRadius: "50%", background: i <= groundStep ? "linear-gradient(135deg, #FFD700, #F8B4C8)" : "rgba(255,255,255,0.15)" }}></div>; })}</div>
+              {groundStep < 4 ? <button onClick={function() { setGroundStep(groundStep + 1); }} style={{ padding: "14px 32px", background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 14, color: "white", fontFamily: "DM Sans, sans-serif", fontWeight: 600, fontSize: 15, cursor: "pointer" }}>Next</button> : <p style={{ fontSize: 18, color: "white", fontWeight: 600 }}>You did it. You are here. You are safe.</p>}
+            </div>
+            </>}
             {/* Safety message */}
             <p style={{
               fontSize: 16,
