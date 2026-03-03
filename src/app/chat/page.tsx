@@ -32,6 +32,7 @@ export default function Chat() {
   const [breathCount, setBreathCount] = useState(0);
   const [breathText, setBreathText] = useState("Tap to begin");
   const [breathActive, setBreathActive] = useState(false);
+  const [profileId, setProfileId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const breathTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -49,7 +50,6 @@ export default function Chat() {
       if (breathTimerRef.current) clearTimeout(breathTimerRef.current);
     };
   }, []);
-  useEffect(() => {
   useEffect(() => {
     const p = getProfile();
     if (p && p.firstName) {
