@@ -344,7 +344,7 @@ export default function Chat() {
       {showPanic && (
         <div className="panic-overlay">
           <div className="panic-card">
-            {/* MODE TOGGLE */}
+            <div style={{display:"flex",gap:8,marginBottom:20}}><button onClick={()=>setPanicMode("breathe")} style={{flex:1,padding:"10px",borderRadius:10,border:"none",fontWeight:600,fontSize:14,cursor:"pointer",background:panicMode==="breathe"?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.05)",color:panicMode==="breathe"?"white":"rgba(255,255,255,0.4)"}}>Breathe</button><button onClick={()=>{setPanicMode("ground");setGroundStep(0);}} style={{flex:1,padding:"10px",borderRadius:10,border:"none",fontWeight:600,fontSize:14,cursor:"pointer",background:panicMode==="ground"?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.05)",color:panicMode==="ground"?"white":"rgba(255,255,255,0.4)"}}>Ground</button></div>
             {panicMode === "breathe" && <>
             {/* Breathing circle */}
             <div
