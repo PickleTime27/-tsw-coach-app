@@ -51,9 +51,9 @@ export default function Chat() {
   }, []);
   useEffect(() => {
     const p = getProfile();
-    supabase.auth.getUser().then(function(u) {
-      if (u.data.user) {
-        supabase.from("messages").select("*").eq("profile_id", u.data.user.id).order("created_at", { ascending: true }).then(function(res) {
+    supabase.auth.getSession().then(function(u) {
+      var user = u.data.session && u.data.session.user; if (user) {
+        supabase.from("messages").select("*").eq("profile_id", user.id).order("created_at", { ascending: true }).then(function(res) {
           if (res.data && res.data.length > 0) {
             setMessages(res.data.map(function(m, i) { return { id: i.toString(), role: m.role, content: m.content, timestamp: new Date(m.created_at) }; }));
           } else if (p && p.firstName) {
@@ -125,7 +125,7 @@ export default function Chat() {
       content: input.trim(),
       timestamp: new Date(),
     };
-    supabase.auth.getUser().then(function(u) { if (u.data.user) { supabase.from("messages").insert({ profile_id: u.data.user.id, role: "user", content: userMessage.content }); } });
+    supabase.auth.getSession().then(function(u) { var user = u.data.session && u.data.session.user; if (user) { supabase.from("messages").insert({ profile_id: user.id, role: "user", content: userMessage.content }); } });
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -156,7 +156,7 @@ export default function Chat() {
         };
         setMessages((prev) => [...prev, balmResponse]);
       } else {
-        supabase.auth.getUser().then(function(u) { if (u.data.user) { supabase.from("messages").insert({ profile_id: u.data.user.id, role: "assistant", content: data.message }); } });
+        supabase.auth.getSession().then(function(u) { var user = u.data.session && u.data.session.user; if (user) { supabase.from("messages").insert({ profile_id: user.id, role: "assistant", content: data.message }); } });
         const errorResponse: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
