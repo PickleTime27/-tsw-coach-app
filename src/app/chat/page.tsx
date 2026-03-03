@@ -458,9 +458,9 @@ export default function Chat() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <button className="panic-btn" onClick={() => setShowPanic(true)}>
+          {getProfile()?.userRole !== "supporter" && <button className="panic-btn" onClick={() => setShowPanic(true)}>
             {"\uD83C\uDD98"} Panic Button
-          </button>
+          </button>}
         </div>
       </div>
 
