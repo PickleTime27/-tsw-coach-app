@@ -1,5 +1,6 @@
 "use client";
 import { getProfile } from "@/lib/profile";
+import { supabase } from "@/lib/supabase";
 import { useState, useRef, useEffect } from "react";
 
 const BALM_GREEN = "#1B6B4A";
@@ -114,6 +115,7 @@ export default function Chat() {
       content: input.trim(),
       timestamp: new Date(),
     };
+    supabase.auth.getUser().then(function(u) { if (u.data.user) { supabase.from("messages").insert({ profile_id: u.data.user.id, role: "user", content: userMessage.content }); } });
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -144,6 +146,7 @@ export default function Chat() {
         };
         setMessages((prev) => [...prev, balmResponse]);
       } else {
+        supabase.auth.getUser().then(function(u) { if (u.data.user) { supabase.from("messages").insert({ profile_id: u.data.user.id, role: "assistant", content: data.message }); } });
         const errorResponse: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
