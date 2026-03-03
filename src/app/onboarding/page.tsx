@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { saveProfile } from "@/lib/profile";
+import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 
 const BALM_GREEN = "#1B6B4A";
@@ -519,8 +520,7 @@ export default function Onboarding() {
               <button
                 className="btn-next"
                 onClick={() => {
-                  // TODO: Save to Supabase and redirect to dashboard
-                  saveProfile(profile); router.push("/chat");
+                  saveProfile(profile); supabase.auth.getUser().then(function(res) { if (res.data.user) { supabase.from("profiles").upsert({ id: res.data.user.id, email: res.data.user.email, first_name: profile.firstName, user_role: profile.userRole, affected_person_name: profile.affectedPersonName, affected_person_age: profile.affectedPersonAge, relationship: profile.relationship, tsw_stage: profile.tswStage, months_since_withdrawal: profile.monthsSinceWithdrawal, current_symptoms: profile.currentSymptoms, spiritual_enabled: profile.spiritualEnabled, spiritual_tradition: profile.spiritualTradition }).then(function(r) { console.log("profile saved", r); }); } }); router.push("/chat");
                 }}
               >
                 Meet BALM →
