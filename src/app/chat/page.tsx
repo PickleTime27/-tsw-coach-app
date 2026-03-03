@@ -51,9 +51,19 @@ export default function Chat() {
   }, []);
   useEffect(() => {
     const p = getProfile();
-    if (p && p.firstName) {
-      setMessages([{ id: "welcome", role: "assistant", content: "Hi " + p.firstName + "! I\u2019m BALM \u2014 your companion through TSW. I\u2019m here whenever you need to talk, ask questions, or just have someone who understands. How are you doing today?", timestamp: new Date() }]);
-    }
+    supabase.auth.getUser().then(function(u) {
+      if (u.data.user) {
+        supabase.from("messages").select("*").eq("profile_id", u.data.user.id).order("created_at", { ascending: true }).then(function(res) {
+          if (res.data && res.data.length > 0) {
+            setMessages(res.data.map(function(m, i) { return { id: i.toString(), role: m.role, content: m.content, timestamp: new Date(m.created_at) }; }));
+          } else if (p && p.firstName) {
+            setMessages([{ id: "welcome", role: "assistant", content: "Hi " + p.firstName + "! I\u2019m BALM \u2014 your companion through TSW. I\u2019m here whenever you need to talk, ask questions, or just have someone who understands. How are you doing today?", timestamp: new Date() }]);
+          }
+        });
+      } else if (p && p.firstName) {
+        setMessages([{ id: "welcome", role: "assistant", content: "Hi " + p.firstName + "! I\u2019m BALM \u2014 your companion through TSW. I\u2019m here whenever you need to talk, ask questions, or just have someone who understands. How are you doing today?", timestamp: new Date() }]);
+      }
+    });
   }, []);
 
   const startBreathing = () => {
