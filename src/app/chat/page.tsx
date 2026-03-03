@@ -50,17 +50,20 @@ export default function Chat() {
     };
   }, []);
   useEffect(() => {
+  useEffect(() => {
     const p = getProfile();
-    if (p && p.profileId) {
-      supabase.from("messages").select("*").eq("profile_id", p.profileId).order("created_at", { ascending: true }).then(function(res) {
-        if (res.data && res.data.length > 0) {
-          setMessages(res.data.map(function(m, i) { return { id: i.toString(), role: m.role, content: m.content, timestamp: new Date(m.created_at) }; }));
-        } else if (p.firstName) {
-          setMessages([{ id: "welcome", role: "assistant", content: "Hi " + p.firstName + "! I\u2019m BALM \u2014 your companion through TSW. I\u2019m here whenever you need to talk, ask questions, or just have someone who understands. How are you doing today?", timestamp: new Date() }]);
+    if (p && p.firstName) {
+      supabase.from("profiles").select("id").eq("first_name", p.firstName).limit(1).then(function(res) {
+        if (res.data && res.data[0]) {
+          var pid = res.data[0].id;
+          setProfileId(pid);
+          supabase.from("messages").select("*").eq("profile_id", pid).order("created_at", { ascending: true }).then(function(msgRes) {
+            if (msgRes.data && msgRes.data.length > 0) {
+              setMessages(msgRes.data.map(function(m, i) { return { id: i.toString(), role: m.role, content: m.content, timestamp: new Date(m.created_at) }; }));
+            }
+          });
         }
       });
-    } else if (p && p.firstName) {
-      setMessages([{ id: "welcome", role: "assistant", content: "Hi " + p.firstName + "! I\u2019m BALM \u2014 your companion through TSW. I\u2019m here whenever you need to talk, ask questions, or just have someone who understands. How are you doing today?", timestamp: new Date() }]);
     }
   }, []);
 
