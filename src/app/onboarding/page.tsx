@@ -520,7 +520,7 @@ export default function Onboarding() {
               <button
                 className="btn-next"
                 onClick={() => {
-                  saveProfile(profile); supabase.auth.getUser().then(function(res) { if (res.data.user) { supabase.from("profiles").upsert({ id: res.data.user.id, email: res.data.user.email, first_name: profile.firstName, user_role: profile.userRole, affected_person_name: profile.affectedPersonName, affected_person_age: profile.affectedPersonAge, relationship: profile.relationship, tsw_stage: profile.tswStage, months_since_withdrawal: profile.monthsSinceWithdrawal, current_symptoms: profile.currentSymptoms, spiritual_enabled: profile.spiritualEnabled, spiritual_tradition: profile.spiritualTradition }).then(function(r) { console.log("profile saved", r); }); } }); router.push("/chat");
+                  saveProfile({...profile, profileId: res.data.user.id}); supabase.auth.getUser().then(function(res) { if (res.data.user) { supabase.from("profiles").upsert({ id: res.data.user.id, email: res.data.user.email, first_name: profile.firstName, user_role: profile.userRole, affected_person_name: profile.affectedPersonName, affected_person_age: profile.affectedPersonAge, relationship: profile.relationship, tsw_stage: profile.tswStage, months_since_withdrawal: profile.monthsSinceWithdrawal, current_symptoms: profile.currentSymptoms, spiritual_enabled: profile.spiritualEnabled, spiritual_tradition: profile.spiritualTradition }).then(function(r) { console.log("profile saved", r); }); saveProfile({...profile, profileId: res.data.user.id}); } }); router.push("/chat");
                 }}
               >
                 Meet BALM →

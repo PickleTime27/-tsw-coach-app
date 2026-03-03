@@ -1,7 +1,7 @@
 // Temporary profile storage using cookies until Supabase is set up
 
 export interface UserProfile {
-  firstName: string;
+  profileId: string; firstName: string;
   userRole: "self" | "parent" | "supporter" | null;
   affectedPersonName: string;
   affectedPersonAge: string;

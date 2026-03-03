@@ -51,19 +51,17 @@ export default function Chat() {
   }, []);
   useEffect(() => {
     const p = getProfile();
-    supabase.auth.getSession().then(function(u) {
-      var user = u.data.session && u.data.session.user; if (user) {
-        supabase.from("messages").select("*").eq("profile_id", user.id).order("created_at", { ascending: true }).then(function(res) {
-          if (res.data && res.data.length > 0) {
-            setMessages(res.data.map(function(m, i) { return { id: i.toString(), role: m.role, content: m.content, timestamp: new Date(m.created_at) }; }));
-          } else if (p && p.firstName) {
-            setMessages([{ id: "welcome", role: "assistant", content: "Hi " + p.firstName + "! I\u2019m BALM \u2014 your companion through TSW. I\u2019m here whenever you need to talk, ask questions, or just have someone who understands. How are you doing today?", timestamp: new Date() }]);
-          }
-        });
-      } else if (p && p.firstName) {
-        setMessages([{ id: "welcome", role: "assistant", content: "Hi " + p.firstName + "! I\u2019m BALM \u2014 your companion through TSW. I\u2019m here whenever you need to talk, ask questions, or just have someone who understands. How are you doing today?", timestamp: new Date() }]);
-      }
-    });
+    if (p && p.profileId) {
+      supabase.from("messages").select("*").eq("profile_id", p.profileId).order("created_at", { ascending: true }).then(function(res) {
+        if (res.data && res.data.length > 0) {
+          setMessages(res.data.map(function(m, i) { return { id: i.toString(), role: m.role, content: m.content, timestamp: new Date(m.created_at) }; }));
+        } else if (p.firstName) {
+          setMessages([{ id: "welcome", role: "assistant", content: "Hi " + p.firstName + "! I\u2019m BALM \u2014 your companion through TSW. I\u2019m here whenever you need to talk, ask questions, or just have someone who understands. How are you doing today?", timestamp: new Date() }]);
+        }
+      });
+    } else if (p && p.firstName) {
+      setMessages([{ id: "welcome", role: "assistant", content: "Hi " + p.firstName + "! I\u2019m BALM \u2014 your companion through TSW. I\u2019m here whenever you need to talk, ask questions, or just have someone who understands. How are you doing today?", timestamp: new Date() }]);
+    }
   }, []);
 
   const startBreathing = () => {
@@ -125,7 +123,7 @@ export default function Chat() {
       content: input.trim(),
       timestamp: new Date(),
     };
-    supabase.auth.getSession().then(function(u) { var user = u.data.session && u.data.session.user; if (user) { supabase.from("messages").insert({ profile_id: user.id, role: "user", content: userMessage.content }); } });
+    var prof = getProfile(); if (prof && prof.profileId) { supabase.from("messages").insert({ profile_id: prof.profileId, role: "user", content: userMessage.content }).then(function(x) { console.log("user msg saved", x); }); }
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -156,7 +154,7 @@ export default function Chat() {
         };
         setMessages((prev) => [...prev, balmResponse]);
       } else {
-        supabase.auth.getSession().then(function(u) { var user = u.data.session && u.data.session.user; if (user) { supabase.from("messages").insert({ profile_id: user.id, role: "assistant", content: data.message }); } });
+        var prof2 = getProfile(); if (prof2 && prof2.profileId) { supabase.from("messages").insert({ profile_id: prof2.profileId, role: "assistant", content: data.message }).then(function(x) { console.log("balm msg saved", x); }); }
         const errorResponse: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
