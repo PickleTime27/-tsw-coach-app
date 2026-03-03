@@ -115,7 +115,7 @@ export default function Chat() {
       content: input.trim(),
       timestamp: new Date(),
     };
-    supabase.auth.getUser().then(function(u) { console.log("auth user:", u.data.user); if (u.data.user) { supabase.from("messages").insert({ profile_id: u.data.user.id, role: "user", content: userMessage.content }).then(function(r) { console.log("msg save:", r); }); } else { console.log("no auth user found"); } });
+    supabase.auth.getUser().then(function(u) { if (u.data.user) { supabase.from("messages").insert({ profile_id: u.data.user.id, role: "user", content: userMessage.content }); } });
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
