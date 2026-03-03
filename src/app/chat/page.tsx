@@ -2,6 +2,7 @@
 import { getProfile } from "@/lib/profile";
 import { supabase } from "@/lib/supabase";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const BALM_GREEN = "#1B6B4A";
 const SAGE_LIGHT = "#E8F5EC";
@@ -35,6 +36,7 @@ export default function Chat() {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [panicMode, setPanicMode] = useState("breathe");
   const [groundStep, setGroundStep] = useState(0);
+  const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const breathTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -483,6 +485,7 @@ export default function Chat() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <button onClick={() => router.push("/community")} style={{ padding: "8px 16px", background: "rgba(27,107,74,0.1)", color: BALM_GREEN, border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>Community</button>
           {["self","parent"].includes(String(getProfile()?.userRole)) && <button className="panic-btn" onClick={() => setShowPanic(true)}>
             {"\uD83C\uDD98"} Panic Button
           </button>}
