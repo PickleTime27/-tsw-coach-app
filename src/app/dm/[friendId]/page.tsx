@@ -56,7 +56,7 @@ export default function DM() {
       <div ref={endRef}></div>
     </div>
     <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(27,107,74,0.1)", display: "flex", gap: 12 }}>
-      <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }} placeholder={"Message " + friendName + "..."} style={{ flex: 1, padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(27,107,74,0.2)", fontSize: 15, outline: "none" }} />
+      <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }} placeholder={"Message " + friendName + "..."} style={{ flex: 1, padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(27,107,74,0.2)", fontSize: 15, outline: "none", color: "#1a1a1a" }} />
       <button onClick={sendMessage} style={{ padding: "12px 24px", background: BALM_GREEN, color: "white", border: "none", borderRadius: 12, cursor: "pointer", fontWeight: 600 }}>Send</button>
     </div>
   </div>);
