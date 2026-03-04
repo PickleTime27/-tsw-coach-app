@@ -255,7 +255,7 @@ export default function Home() {
 
               <div className="fade-in fade-in-delay-3" style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
                 <button className="btn-primary" onClick={() => window.location.href="/auth"}>Start Your Journey — Free</button>
-                <button className="btn-secondary">Learn More ↓</button>
+                <button className="btn-secondary" onClick={() => document.getElementById("about-section")?.scrollIntoView({ behavior: "smooth" })}>Learn More 2193</button>
               </div>
 
               <div className="fade-in fade-in-delay-4" style={{ marginTop: 32, display: "flex", gap: 32, flexWrap: "wrap" }}>
@@ -501,6 +501,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ABOUT SECTION */}
+      <section id="about-section" style={{ padding: "80px 24px", background: "#F5F0E8" }}>
+        <div style={{ maxWidth: 800, margin: "0 auto" }}>
+          <h2 style={{ fontFamily: "Lora, Georgia, serif", fontSize: 32, fontWeight: 700, color: "#1a1a1a", textAlign: "center", marginBottom: 40 }}>About TSW Coach</h2>
+          <div style={{ marginBottom: 32 }}>
+            <h3 style={{ fontFamily: "DM Sans, sans-serif", fontSize: 18, fontWeight: 700, color: "#1B6B4A", marginBottom: 12 }}>What is BALM?</h3>
+            <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 15, color: "#555", lineHeight: 1.7 }}>BALM (Beyond Addiction, Life Mentor) is an AI companion designed specifically for people navigating Topical Steroid Withdrawal. BALM remembers your conversations, understands your journey, and is available 24/7 when you need support.</p>
+          </div>
+          <div style={{ marginBottom: 32 }}>
+            <h3 style={{ fontFamily: "DM Sans, sans-serif", fontSize: 18, fontWeight: 700, color: "#1B6B4A", marginBottom: 12 }}>Your Privacy Matters</h3>
+            <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 15, color: "#555", lineHeight: 1.7 }}>We will never sell your data. Period. Your conversations with BALM, your profile information, and your community interactions are yours. We do not run ads, solicit products, or share your information with third parties. TSW Coach exists to help people, not to profit from their pain.</p>
+          </div>
+          <div style={{ marginBottom: 32 }}>
+            <h3 style={{ fontFamily: "DM Sans, sans-serif", fontSize: 18, fontWeight: 700, color: "#1B6B4A", marginBottom: 12 }}>Medical Disclaimer</h3>
+            <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 15, color: "#555", lineHeight: 1.7 }}>TSW Coach and BALM are not substitutes for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or qualified health provider with any questions you may have regarding a medical condition. If you are in crisis, please call 988 (Suicide and Crisis Lifeline) or text HOME to 741741.</p>
+          </div>
+          <div>
+            <h3 style={{ fontFamily: "DM Sans, sans-serif", fontSize: 18, fontWeight: 700, color: "#1B6B4A", marginBottom: 12 }}>Our Mission</h3>
+            <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 15, color: "#555", lineHeight: 1.7 }}>TSW Coach was built by someone who understands what TSW families go through. Our goal is to provide free, accessible support for patients and caregivers, build community, and advocate for TSW-related legislation and research. We believe no one should face this alone.</p>
+          </div>
+        </div>
+      </section>
       {/* FOOTER */}
       <footer style={{ padding: "40px", background: DEEP_FOREST, textAlign: "center" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16 }}>
