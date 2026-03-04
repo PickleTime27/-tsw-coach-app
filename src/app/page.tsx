@@ -255,7 +255,7 @@ export default function Home() {
 
               <div className="fade-in fade-in-delay-3" style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
                 <button className="btn-primary" onClick={() => window.location.href="/auth"}>Start Your Journey — Free</button>
-                <button className="btn-secondary" onClick={() => document.getElementById("about-section")?.scrollIntoView({ behavior: "smooth" })}>Learn More 2193</button>
+                <button className="btn-secondary" onClick={() => document.getElementById("about-section")?.scrollIntoView({ behavior: "smooth" })}>Learn More ↓</button>
               </div>
 
               <div className="fade-in fade-in-delay-4" style={{ marginTop: 32, display: "flex", gap: 32, flexWrap: "wrap" }}>
