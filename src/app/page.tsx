@@ -302,6 +302,13 @@ export default function Home() {
                     I know last night was really hard. How are you feeling this morning? I'm here whenever you're ready to talk.
                   </p>
                 </div>
+                {/* Extra floating bubbles */}
+                <div className="float-gentle" style={{ position: "absolute", top: -30, right: -40, background: "white", borderRadius: 14, padding: "14px 18px", maxWidth: 220, boxShadow: "0 6px 20px rgba(13,40,24,0.08)", animationDelay: "1.5s" }}>
+                  <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 13, lineHeight: 1.5, color: "#4A5D52", margin: 0 }}>Is it normal for my skin to cycle between flares and calm periods?</p>
+                </div>
+                <div className="float-gentle" style={{ position: "absolute", bottom: -20, left: -50, background: BALM_GREEN, borderRadius: 14, padding: "14px 18px", maxWidth: 230, boxShadow: "0 6px 20px rgba(13,40,24,0.12)", animationDelay: "3s" }}>
+                  <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 13, lineHeight: 1.5, color: "white", margin: 0 }}>Yes, that cycling is very common during TSW. Your skin is healing in waves.</p>
+                </div>
               </div>
             </div>
           </div>
