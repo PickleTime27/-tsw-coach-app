@@ -1,16 +1,21 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const key = process.env.NEWS_API_KEY;
-  if (!key) return NextResponse.json({ error: "No API key" }, { status: 500 });
-
   try {
     const res = await fetch(
-      "https://newsapi.org/v2/everything?q=topical+steroid+withdrawal+OR+TSW+eczema+steroid&sortBy=publishedAt&pageSize=20&language=en",
-      { headers: { "X-Api-Key": key }, next: { revalidate: 3600 } }
+      "https://news.google.com/rss/search?q=topical+steroid+withdrawal+OR+TSW+eczema&hl=en-US&gl=US&ceid=US:en"
     );
-    const data = await res.json();
-    return NextResponse.json(data);
+    const xml = await res.text();
+    const items: { title: string; url: string; source: string; date: string }[] = [];
+    const matches = xml.match(/<item>([\s\S]*?)<\/item>/g) || [];
+    for (const item of matches.slice(0, 20)) {
+      const title = (item.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || "";
+      const url = (item.match(/<link>([\s\S]*?)<\/link>/) || [])[1] || "";
+      const source = (item.match(/<source[^>]*>([\s\S]*?)<\/source>/) || [])[1] || "";
+      const date = (item.match(/<pubDate>([\s\S]*?)<\/pubDate>/) || [])[1] || "";
+      items.push({ title: title.replace(/<!\[CDATA\[|\]\]>/g, ""), url, source, date });
+    }
+    return NextResponse.json({ articles: items });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch news" }, { status: 500 });
   }

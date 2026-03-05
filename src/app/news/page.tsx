@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 
 const BALM_GREEN = "#1B6B4A";
 
-interface Article { title: string; description: string; url: string; urlToImage: string; publishedAt: string; source: { name: string }; }
+interface Article { title: string; url: string; source: string; date: string; }
 
 export default function News() {
   const router = useRouter();
@@ -26,16 +26,7 @@ export default function News() {
     <div style={{ padding: 24, maxWidth: 800, margin: "0 auto" }}>
       {loading && <p style={{ textAlign: "center", color: "#888" }}>Loading latest TSW news...</p>}
       {articles.length === 0 && !loading && <p style={{ textAlign: "center", color: "#888" }}>No articles found.</p>}
-      {articles.map(function(a, i) { return <a key={i} href={a.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", background: "white", borderRadius: 12, padding: 20, marginBottom: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.05)", textDecoration: "none", color: "inherit" }}>
-        <div style={{ display: "flex", gap: 16 }}>
-          {a.urlToImage && <img src={a.urlToImage} alt="" style={{ width: 100, height: 70, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />}
-          <div>
-            <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>{a.title}</h3>
-            <p style={{ fontSize: 13, color: "#888", marginBottom: 4 }}>{a.source.name} — {new Date(a.publishedAt).toLocaleDateString()}</p>
-            {a.description && <p style={{ fontSize: 13, color: "#666", lineHeight: 1.5 }}>{a.description.slice(0, 150)}...</p>}
-          </div>
-        </div>
-      </a>; })}
+      {articles.map(function(a, i) { return <a key={i} href={a.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", background: "white", borderRadius: 12, padding: 20, marginBottom: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.05)", textDecoration: "none", color: "inherit" }}><h3 style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>{a.title}</h3><p style={{ fontSize: 13, color: "#888" }}>{a.source} — {new Date(a.date).toLocaleDateString()}</p></a>; })}
     </div>
   </div>);
 }
