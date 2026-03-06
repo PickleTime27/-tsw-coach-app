@@ -1,4 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TSW Coach App
+
+**Your companion through topical steroid withdrawal.**
+
+Live at [tsw-coach-app.vercel.app](https://tsw-coach-app.vercel.app)
+
+---
+
+## About
+
+TSW Coach is a free, AI-powered support platform for people going through topical steroid withdrawal. Built with Next.js, TypeScript, and Supabase.
+
+## Features
+
+- **BALM AI Companion** - 24/7 conversational support trained on TSW science
+- **Symptom Tracker** - Daily logging of 10 TSW-specific symptoms with severity sliders
+- **Progress Charts** - SVG line charts with trend analysis over customizable date ranges
+- **Panic Button** - Breathing exercises, grounding techniques, and crisis resources
+- **Safety Circle** - Trusted contacts alerted when panic button is activated
+- **Community** - Connect with others via posts and direct messages using nicknames
+- **TSW News Feed** - Curated research and news updates
+- **Privacy Policy** - Health data privacy built in from day one
+
+## Tech Stack
+
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Database**: Supabase (PostgreSQL + Row Level Security)
+- **AI**: OpenAI API with custom TSW system prompts
+- **Deployment**: Vercel (auto-deploy from GitHub)
+- **Email**: Resend
+- **Styling**: Inline styles with DM Sans + Lora fonts
+
+## Getting Started
+
+\`\`\`bash
+npm install
+npm run dev
+\`\`\`
+
+Open [http://localhost:3000](http://localhost:3000)
+
+## Project Structure
+
+\`\`\`
+src/
+  app/
+    chat/         # BALM AI companion
+    tracker/      # Symptom tracker with 10 categories
+    progress/     # Progress charts with SVG visualization
+    community/    # Community board
+    dm/           # Direct messages
+    news/         # TSW news feed
+    onboarding/   # User onboarding flow
+    safety-circle/# Safety circle management
+    settings/     # User settings & notifications
+    privacy/      # Privacy policy
+    admin/        # Admin dashboard
+    auth/         # Authentication
+    api/          # API routes (chat, symptoms, checkin, etc.)
+  lib/
+    supabase.ts   # Supabase client
+    profile.ts    # Profile management (cookie-based)
+    notify.ts     # Email notifications
+\`\`\`
+
+## Related
+
+- [tsw-coach](https://github.com/PickleTime27/tsw-coach) - Documentation, product framework, advocacy materials
+
+---
+
+Built by Shawn Bullis in Marysville, Washington.This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
