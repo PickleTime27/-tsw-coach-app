@@ -45,7 +45,7 @@ export default function Community() {
     });
   }, [router]);
 
-  const sendRequest = async (receiverId: string) => { if (myId) { await supabase.from("friendships").insert({ requester_id: myId, receiver_id: receiverId, status: "pending" }); alert("Friend request sent"); } };
+  const sendRequest = async (receiverId: string) => { if (myId) { await supabase.from("friendships").insert({ requester_id: myId, receiver_id: receiverId, status: "pending" }); alert("Friend request sent"); var p = getProfile(); fetch("/api/notify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "friend_request", recipientId: receiverId, senderName: p ? p.firstName : "Someone" }) }); } };
   const respondRequest = async (requestId: string, status: string) => { await supabase.from("friendships").update({ status }).eq("id", requestId); setRequests(requests.filter(function(r) { return r.id !== requestId; })); if (status === "accepted") window.location.reload(); };
 
   return (<div style={{ minHeight: "100vh", background: "#FDF8F0", fontFamily: "DM Sans, sans-serif" }}>
