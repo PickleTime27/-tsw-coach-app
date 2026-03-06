@@ -91,6 +91,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Crisis detection
+    const lastUserMsg = messages[messages.length - 1]?.content?.toLowerCase() || "";
+    const crisisWords = ["kill myself", "want to die", "end it all", "suicide", "self harm", "cutting myself", "cant go on", "no reason to live", "better off dead"];
+    const isCrisis = crisisWords.some(function(w) { return lastUserMsg.includes(w); });
+    if (isCrisis) {
+      const profileId = messages[0]?.profileId;
+      try {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+        const { createClient } = require("@supabase/supabase-js");
+        const sb = createClient(supabaseUrl, supabaseKey);
+        const userName = userProfile && userProfile.firstName ? userProfile.firstName : "";
+        if (userName) {
+          const { data: prof } = await sb.from("profiles").select("id, first_name").eq("first_name", userName).limit(1).single();
+          if (prof) {
+            fetch(new URL("/api/panic-alert", request.url).toString(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ profileId: prof.id, userName: prof.first_name }) });
+          }
+        }
+      } catch (e) { console.error("Crisis alert error:", e); }
+    }
     const data = await response.json();
     const assistantMessage = data.content[0]?.text || "I'm here for you. Can you tell me more about what's going on?";
 
