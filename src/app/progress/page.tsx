@@ -19,6 +19,8 @@ const SYMPTOM_COLORS: Record<string, string> = {
   pain: "#FF9800",
   dryness: "#795548",
   overall_score: "#1B6B4A",
+  nerve_pain: "#E040FB",
+  thermal_regulation: "#FF5722",
 };
 
 const SYMPTOM_LABELS: Record<string, string> = {
@@ -250,3 +252,4 @@ export default function ProgressChart() {
     </div>
   );
 }
+

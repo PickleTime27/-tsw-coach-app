@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { getProfile } from "@/lib/profile";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -10,14 +10,14 @@ const DEEP_FOREST = "#0D2818";
 const MUTED_TEAL = "#5BA68A";
 
 const SYMPTOMS = [
-  { key: "itching", label: "Itching", emoji: "🔥", description: "Skin irritation & itch intensity" },
-  { key: "redness", label: "Redness", emoji: "🟥", description: "Skin redness & inflammation" },
-  { key: "flaking", label: "Flaking", emoji: "🫧", description: "Skin shedding & flaking" },
-  { key: "oozing", label: "Oozing", emoji: "💧", description: "Weeping or oozing areas" },
-  { key: "swelling", label: "Swelling", emoji: "🎈", description: "Puffiness or swelling" },
-  { key: "sleep_quality", label: "Sleep Quality", emoji: "🌙", description: "10 = great sleep, 0 = no sleep" },
-  { key: "pain", label: "Pain", emoji: "⚡", description: "Skin pain or burning" },
-  { key: "dryness", label: "Dryness", emoji: "🏜️", description: "Skin dryness & tightness" },
+  { key: "itching", label: "Itching", emoji: "ðŸ”¥", description: "Skin irritation & itch intensity" },
+  { key: "redness", label: "Redness", emoji: "ðŸŸ¥", description: "Skin redness & inflammation" },
+  { key: "flaking", label: "Flaking", emoji: "ðŸ«§", description: "Skin shedding & flaking" },
+  { key: "oozing", label: "Oozing", emoji: "ðŸ’§", description: "Weeping or oozing areas" },
+  { key: "swelling", label: "Swelling", emoji: "ðŸŽˆ", description: "Puffiness or swelling" },
+  { key: "sleep_quality", label: "Sleep Quality", emoji: "ðŸŒ™", description: "10 = great sleep, 0 = no sleep" },
+  { key: "pain", label: "Pain", emoji: "âš¡", description: "Skin pain or burning" },
+  { key: "dryness", label: "Dryness", emoji: "ðŸœï¸", description: "Skin dryness & tightness" },
 ];
 
 function getSeverityColor(value: number): string {
@@ -41,6 +41,7 @@ export default function SymptomTracker() {
   const [values, setValues] = useState<Record<string, number>>({
     itching: 0, redness: 0, flaking: 0, oozing: 0,
     swelling: 0, sleep_quality: 5, pain: 0, dryness: 0,
+    nerve_pain: 0, thermal_regulation: 0,
   });
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -124,7 +125,7 @@ export default function SymptomTracker() {
       <div style={{ padding: "16px 24px", borderBottom: "1px solid rgba(27,107,74,0.1)", background: "rgba(253,248,240,0.95)", backdropFilter: "blur(20px)", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 36, height: 36, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ color: "white", fontSize: 18 }}>📊</span>
+            <span style={{ color: "white", fontSize: 18 }}>ðŸ“Š</span>
           </div>
           <div>
             <div style={{ fontWeight: 700, fontSize: 16, color: DEEP_FOREST }}>Symptom Tracker</div>
@@ -132,8 +133,8 @@ export default function SymptomTracker() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <button onClick={() => router.push("/progress")} style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${BALM_GREEN}`, background: "transparent", color: BALM_GREEN, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>📈 Progress</button>
-          <button onClick={() => setShowMenu(!showMenu)} style={{ padding: "8px 12px", background: "transparent", border: "1px solid rgba(27,107,74,0.2)", borderRadius: 8, cursor: "pointer", fontSize: 18 }}>☰</button>
+          <button onClick={() => router.push("/progress")} style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${BALM_GREEN}`, background: "transparent", color: BALM_GREEN, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>ðŸ“ˆ Progress</button>
+          <button onClick={() => setShowMenu(!showMenu)} style={{ padding: "8px 12px", background: "transparent", border: "1px solid rgba(27,107,74,0.2)", borderRadius: 8, cursor: "pointer", fontSize: 18 }}>â˜°</button>
           {showMenu && <div style={{ position: "absolute", top: 60, right: 16, background: "white", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", padding: 8, zIndex: 100, minWidth: 180 }}>
             {[{ label: "Home", path: "/" }, { label: "Chat with BALM", path: "/chat" }, { label: "Community", path: "/community" }, { label: "Progress Chart", path: "/progress" }, { label: "News", path: "/news" }, { label: "Settings", path: "/settings" }].map(item => <button key={item.path} onClick={() => { router.push(item.path); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8, fontFamily: "'DM Sans', sans-serif" }}>{item.label}</button>)}
           </div>}
@@ -142,7 +143,7 @@ export default function SymptomTracker() {
 
       <div style={{ maxWidth: 640, margin: "0 auto", padding: "24px 20px 120px" }}>
         {todayLogged && <div style={{ background: SAGE_LIGHT, borderRadius: 16, padding: "16px 20px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12, border: `1px solid rgba(27,107,74,0.15)` }}>
-          <span className="check-pop" style={{ fontSize: 24 }}>✅</span>
+          <span className="check-pop" style={{ fontSize: 24 }}>âœ…</span>
           <div><div style={{ fontWeight: 600, fontSize: 14, color: DEEP_FOREST }}>Already logged today</div><div style={{ fontSize: 13, color: MUTED_TEAL }}>You can still log again to update your entry.</div></div>
         </div>}
 
@@ -173,19 +174,20 @@ export default function SymptomTracker() {
         </div>
 
         <div style={{ background: "white", borderRadius: 16, padding: "20px 24px", marginTop: 16, boxShadow: "0 2px 8px rgba(13,40,24,0.04)", border: "1px solid rgba(27,107,74,0.06)" }}>
-          <div style={{ fontWeight: 600, fontSize: 15, color: DEEP_FOREST, marginBottom: 10 }}>📝 Notes (optional)</div>
+          <div style={{ fontWeight: 600, fontSize: 15, color: DEEP_FOREST, marginBottom: 10 }}>ðŸ“ Notes (optional)</div>
           <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="How are you feeling today? Any triggers, changes, or wins..." rows={3} style={{ width: "100%", border: `2px solid rgba(27,107,74,0.1)`, borderRadius: 12, padding: "12px 16px", fontSize: 14, fontFamily: "'DM Sans', sans-serif", color: DEEP_FOREST, background: WARM_CREAM, outline: "none", resize: "vertical", lineHeight: 1.6 }} />
         </div>
 
         <button onClick={handleSave} disabled={saving} style={{ width: "100%", padding: "18px", borderRadius: 16, border: "none", fontWeight: 700, fontSize: 16, fontFamily: "'DM Sans', sans-serif", cursor: saving ? "not-allowed" : "pointer", marginTop: 24, background: saved ? "#4CAF50" : BALM_GREEN, color: "white", transition: "all 0.3s ease", boxShadow: "0 4px 16px rgba(27,107,74,0.25)" }}>
-          {saving ? "Saving..." : saved ? "✓ Saved!" : todayLogged ? "Update Today's Log" : "Save Today's Log"}
+          {saving ? "Saving..." : saved ? "âœ“ Saved!" : todayLogged ? "Update Today's Log" : "Save Today's Log"}
         </button>
 
         <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-          <button onClick={() => router.push("/progress")} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid rgba(27,107,74,0.15)`, background: "white", fontWeight: 600, fontSize: 14, cursor: "pointer", color: DEEP_FOREST, fontFamily: "'DM Sans', sans-serif" }}>📈 View Progress</button>
-          <button onClick={() => router.push("/chat")} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid rgba(27,107,74,0.15)`, background: "white", fontWeight: 600, fontSize: 14, cursor: "pointer", color: DEEP_FOREST, fontFamily: "'DM Sans', sans-serif" }}>💬 Talk to BALM</button>
+          <button onClick={() => router.push("/progress")} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid rgba(27,107,74,0.15)`, background: "white", fontWeight: 600, fontSize: 14, cursor: "pointer", color: DEEP_FOREST, fontFamily: "'DM Sans', sans-serif" }}>ðŸ“ˆ View Progress</button>
+          <button onClick={() => router.push("/chat")} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid rgba(27,107,74,0.15)`, background: "white", fontWeight: 600, fontSize: 14, cursor: "pointer", color: DEEP_FOREST, fontFamily: "'DM Sans', sans-serif" }}>ðŸ’¬ Talk to BALM</button>
         </div>
       </div>
     </div>
   );
 }
+
