@@ -486,6 +486,7 @@ export default function Chat() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <button onClick={() => router.push("/")} style={{ padding: "8px 16px", background: "transparent", color: BALM_GREEN, border: "1px solid rgba(27,107,74,0.2)", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>Home</button>
+          <button onClick={() => router.push("/settings")} style={{ padding: "8px 16px", background: "transparent", color: BALM_GREEN, border: "1px solid rgba(27,107,74,0.2)", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>Settings</button>
           <button onClick={() => router.push("/news")} style={{ padding: "8px 16px", background: "transparent", color: BALM_GREEN, border: "1px solid rgba(27,107,74,0.2)", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>News</button>
           <button onClick={() => router.push("/community")} style={{ padding: "8px 16px", background: "rgba(27,107,74,0.1)", color: BALM_GREEN, border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>Community</button>
           {["self","parent"].includes(String(getProfile()?.userRole)) && <button className="panic-btn" onClick={() => setShowPanic(true)}>
