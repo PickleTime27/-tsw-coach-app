@@ -18,8 +18,6 @@ const SYMPTOMS = [
   { key: "sleep_quality", label: "Sleep Quality", emoji: "ðŸŒ™", description: "10 = great sleep, 0 = no sleep" },
   { key: "pain", label: "Pain", emoji: "âš¡", description: "Skin pain or burning" },
   { key: "dryness", label: "Dryness", emoji: "ðŸœï¸", description: "Skin dryness & tightness" },
-  { key: "nerve_pain", label: "Nerve Pain", emoji: "🧠", description: "Tingling, burning, or nerve sensations" },
-  { key: "thermal_regulation", label: "Thermal Regulation", emoji: "🌡️", description: "Hot flashes, chills, or temperature swings" },
 ];
 
 function getSeverityColor(value: number): string {
@@ -192,5 +190,4 @@ export default function SymptomTracker() {
     </div>
   );
 }
-
 
