@@ -475,7 +475,7 @@ export default function Chat() {
       )}
 
       {/* HEADER */}
-      <div style={{ padding: "16px 24px", borderBottom: "1px solid rgba(27,107,74,0.1)", background: "rgba(253,248,240,0.95)", backdropFilter: "blur(20px)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ padding: "16px 24px", borderBottom: "1px solid rgba(27,107,74,0.1)", background: "rgba(253,248,240,0.95)", backdropFilter: "blur(20px)", display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 36, height: 36, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <span style={{ color: "white", fontSize: 18 }}>{"\u2726"}</span>
@@ -486,7 +486,7 @@ export default function Chat() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <button onClick={() => setShowMenu(!showMenu)} style={{ padding: "8px 12px", background: "transparent", border: "1px solid rgba(27,107,74,0.2)", borderRadius: 8, cursor: "pointer", fontSize: 18 }}>{"u2630"}</button>
+          <button onClick={() => setShowMenu(!showMenu)} style={{ padding: "8px 12px", background: "transparent", border: "1px solid rgba(27,107,74,0.2)", borderRadius: 8, cursor: "pointer", fontSize: 18 }}>{"\u2630"}</button>
           {showMenu && <div style={{ position: "absolute", top: 60, right: 16, background: "white", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", padding: 8, zIndex: 100, minWidth: 180 }}>
             <button onClick={() => { router.push("/"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Home</button>
             <button onClick={() => { router.push("/community"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Community</button>
@@ -582,3 +582,4 @@ export default function Chat() {
     </div>
   );
 }
+
