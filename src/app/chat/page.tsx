@@ -29,6 +29,7 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPanic, setShowPanic] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [breathPhase, setBreathPhase] = useState("ready");
   const [breathCount, setBreathCount] = useState(0);
   const [breathText, setBreathText] = useState("Tap to begin");
@@ -485,11 +486,14 @@ export default function Chat() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <button onClick={() => router.push("/")} style={{ padding: "8px 16px", background: "transparent", color: BALM_GREEN, border: "1px solid rgba(27,107,74,0.2)", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>Home</button>
-          {["self","parent"].includes(String(getProfile()?.userRole)) && <button onClick={() => router.push("/safety-circle")} style={{ padding: "8px 16px", background: "transparent", color: "#E8534A", border: "1px solid rgba(232,83,74,0.3)", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>Safety Circle</button>}
-          <button onClick={() => router.push("/settings")} style={{ padding: "8px 16px", background: "transparent", color: BALM_GREEN, border: "1px solid rgba(27,107,74,0.2)", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>Settings</button>
-          <button onClick={() => router.push("/news")} style={{ padding: "8px 16px", background: "transparent", color: BALM_GREEN, border: "1px solid rgba(27,107,74,0.2)", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>News</button>
-          <button onClick={() => router.push("/community")} style={{ padding: "8px 16px", background: "rgba(27,107,74,0.1)", color: BALM_GREEN, border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>Community</button>
+          <button onClick={() => setShowMenu(!showMenu)} style={{ padding: "8px 12px", background: "transparent", border: "1px solid rgba(27,107,74,0.2)", borderRadius: 8, cursor: "pointer", fontSize: 18 }}>{"u2630"}</button>
+          {showMenu && <div style={{ position: "absolute", top: 60, right: 16, background: "white", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", padding: 8, zIndex: 100, minWidth: 180 }}>
+            <button onClick={() => { router.push("/"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Home</button>
+            <button onClick={() => { router.push("/community"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Community</button>
+            <button onClick={() => { router.push("/news"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>News</button>
+            <button onClick={() => { router.push("/settings"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Settings</button>
+            {["self","parent"].includes(String(getProfile()?.userRole)) && <button onClick={() => { router.push("/safety-circle"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#E8534A", borderRadius: 8 }}>Safety Circle</button>}
+          </div>}
           {["self","parent"].includes(String(getProfile()?.userRole)) && <button className="panic-btn" onClick={() => { setShowPanic(true); var p = getProfile(); if (profileId) { fetch("/api/panic-alert", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ profileId: profileId, userName: p ? p.firstName : "Someone" }) }); } }}>
             {"\uD83C\uDD98"} Panic Button
           </button>}
