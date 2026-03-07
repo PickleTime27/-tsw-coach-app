@@ -1,0 +1,12 @@
+const fs = require('fs');
+let c = fs.readFileSync('src/app/page.tsx', 'utf8');
+c = c.replace(/\u00e2\u0080\u0094/g, '\u2014');
+c = c.replace(/\u00e2\u0080\u0093/g, '\u2014');
+c = c.replace(/\u00e2\u0086\u0093/g, '\u2193');
+c = c.replace(/\u00e2\u009c\u0093/g, '\u2713');
+c = c.replace(/\u00e2\u009c\u00a6/g, '\u2726');
+c = c.replace(/\u00e2\u0080\u0099/g, "'");
+c = c.replace(/\u00c3\u00a2\u00e2\u201a\u00ac\u201c/g, '\u2014');
+fs.writeFileSync('src/app/page.tsx', c, 'utf8');
+let bad = (c.match(/[\u00e2\u00c3]/g) || []).length;
+console.log('Remaining suspect chars:', bad);
