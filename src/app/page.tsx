@@ -438,8 +438,8 @@ export default function Home() {
         <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
           <div className="section-label">The BALM difference</div>
           <h2 style={{ fontSize: 38, fontWeight: 600, marginBottom: 40, color: DEEP_FOREST }}>
-            Not a tracker. Not a chatbot.<br />
-            <span style={{ color: BALM_GREEN, fontStyle: "italic" }}>A companion who cares.</span>
+            Coaching you through every flare, every sleepless night.<br />
+            <span style={{ color: BALM_GREEN, fontStyle: "italic" }}>Real TSW guidance.</span>
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 24, textAlign: "left" }}>
