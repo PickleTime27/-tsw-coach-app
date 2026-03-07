@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
+import { getProfile } from "@/lib/profile";
 
 // TSW Coach Landing Page
 // Warm, calming design that communicates safety and understanding
@@ -14,6 +15,10 @@ const MUTED_TEAL = "#5BA68A";
 export default function LandingPage() {
   const [scrollY, setScrollY] = useState(0);
   const [showNav, setShowNav] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
+  useEffect(() => { const p = getProfile(); if (p && p.firstName) setLoggedIn(true); }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -182,24 +187,24 @@ export default function LandingPage() {
         <div className="nav-fixed">
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: "white", fontSize: 16 }}>✦</span>
+              <span style={{ color: "white", fontSize: 16 }}>âœ¦</span>
             </div>
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 18, color: DEEP_FOREST }}>TSW Coach</span>
           </div>
           <div style={{ display: "flex", gap: 12 }}>
-            <button className="btn-secondary" style={{ padding: "10px 24px", fontSize: 14 }}>Log In</button>
-            <button className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }}>Get Started Free</button>
+            {loggedIn ? (<><button onClick={() => window.location.href="/chat"} className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }}>Go to BALM</button><button onClick={() => setShowMenu(!showMenu)} style={{ width: 40, height: 40, background: "white", border: "1px solid rgba(27,107,74,0.2)", borderRadius: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{"\u2630"}</button></>) : (<><button onClick={() => window.location.href="/auth"} className="btn-secondary" style={{ padding: "10px 24px", fontSize: 14 }}>Log In</button><button onClick={() => window.location.href="/onboarding"} className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }}>Get Started Free</button></>)}
           </div>
         </div>
       )}
 
+      {showMenu && (<div style={{ position: "fixed", top: 60, right: 24, background: "white", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.12)", zIndex: 200, minWidth: 200, overflow: "hidden" }}>{[{ label: "Talk to BALM", path: "/chat", icon: "\uD83D\uDCAC" }, { label: "Symptom Tracker", path: "/tracker", icon: "\uD83D\uDCCA" }, { label: "Progress", path: "/progress", icon: "\uD83D\uDCC8" }, { label: "Community", path: "/community", icon: "\uD83E\uDD1D" }, { label: "News & Research", path: "/news", icon: "\uD83D\uDCF0" }, { label: "Safety Circle", path: "/safety-circle", icon: "\uD83D\uDEE1\uFE0F" }, { label: "Settings", path: "/settings", icon: "\u2699\uFE0F" }].map(function(item) { return <button key={item.path} onClick={() => { setShowMenu(false); window.location.href=item.path; }} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "14px 20px", background: "transparent", border: "none", borderBottom: "1px solid rgba(27,107,74,0.06)", cursor: "pointer", fontSize: 15, color: "#1a1a1a", fontFamily: "DM Sans, sans-serif" }}><span>{item.icon}</span><span>{item.label}</span></button>; })}</div>)}
       {/* HERO */}
       <section className="hero-gradient" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         {/* Top bar */}
         <div style={{ padding: "24px 40px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 40, height: 40, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: "white", fontSize: 20 }}>✦</span>
+              <span style={{ color: "white", fontSize: 20 }}>âœ¦</span>
             </div>
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 20, color: DEEP_FOREST }}>TSW Coach</span>
           </div>
@@ -249,23 +254,23 @@ export default function LandingPage() {
                 marginBottom: 36,
                 maxWidth: 520,
               }}>
-                BALM is your AI coach who understands TSW — the science, the treatments, the emotional toll. Available 24/7 for the moments when you need someone who gets it.
+                BALM is your AI coach who understands TSW â€” the science, the treatments, the emotional toll. Available 24/7 for the moments when you need someone who gets it.
               </p>
 
               <div className="fade-in fade-in-delay-3" style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-                <button className="btn-primary">Start Your Journey — Free</button>
-                <button className="btn-secondary">Learn More ↓</button>
+                <button className="btn-primary">Start Your Journey â€” Free</button>
+                <button className="btn-secondary">Learn More â†“</button>
               </div>
 
               <div className="fade-in fade-in-delay-4" style={{ marginTop: 32, display: "flex", gap: 32, flexWrap: "wrap" }}>
                 <div>
-                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600 }}>✓ Free for patients & caregivers</span>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600 }}>âœ“ Free for patients & caregivers</span>
                 </div>
                 <div>
-                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600 }}>✓ Source-verified info</span>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600 }}>âœ“ Source-verified info</span>
                 </div>
                 <div>
-                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600 }}>✓ No steroids promoted</span>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600 }}>âœ“ No steroids promoted</span>
                 </div>
               </div>
             </div>
@@ -293,7 +298,7 @@ export default function LandingPage() {
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                     <div style={{ width: 28, height: 28, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <span style={{ color: "white", fontSize: 12 }}>✦</span>
+                      <span style={{ color: "white", fontSize: 12 }}>âœ¦</span>
                     </div>
                     <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 14, color: BALM_GREEN }}>BALM</span>
                   </div>
@@ -315,14 +320,14 @@ export default function LandingPage() {
             TSW doesn't just affect one person
           </h2>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 17, color: "#6B7D73", maxWidth: 600, margin: "0 auto 60px", lineHeight: 1.7 }}>
-            Whether you're going through it yourself, watching your child suffer, or supporting someone you love — BALM adapts to your journey.
+            Whether you're going through it yourself, watching your child suffer, or supporting someone you love â€” BALM adapts to your journey.
           </p>
 
           <div className="roles-grid" style={{ display: "flex", gap: 28, justifyContent: "center" }}>
             {/* Self */}
             <div className="role-card" style={{ flex: 1, maxWidth: 300 }}>
               <div style={{ width: 64, height: 64, borderRadius: "50%", background: SAGE_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 28 }}>
-                🤍
+                ðŸ¤
               </div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 12, color: DEEP_FOREST }}>I have TSW</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -333,7 +338,7 @@ export default function LandingPage() {
             {/* Parent */}
             <div className="role-card" style={{ flex: 1, maxWidth: 300 }}>
               <div style={{ width: 64, height: 64, borderRadius: "50%", background: SAGE_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 28 }}>
-                🤍
+                ðŸ¤
               </div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 12, color: DEEP_FOREST }}>My child has TSW</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -344,7 +349,7 @@ export default function LandingPage() {
             {/* Supporter */}
             <div className="role-card" style={{ flex: 1, maxWidth: 300 }}>
               <div style={{ width: 64, height: 64, borderRadius: "50%", background: SAGE_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 28 }}>
-                🤍
+                ðŸ¤
               </div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 12, color: DEEP_FOREST }}>Someone I love has TSW</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -367,16 +372,16 @@ export default function LandingPage() {
 
           <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
             <div className="feature-card">
-              <div style={{ fontSize: 32, marginBottom: 16 }}>💬</div>
+              <div style={{ fontSize: 32, marginBottom: 16 }}>ðŸ’¬</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Talk to BALM anytime</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
-                An AI coach trained on real TSW research. Not generic chatbot responses — BALM knows the NIH studies, the treatments, and what 3am with TSW feels like.
+                An AI coach trained on real TSW research. Not generic chatbot responses â€” BALM knows the NIH studies, the treatments, and what 3am with TSW feels like.
               </p>
             </div>
 
             <a href="/tracker" style={{ textDecoration: "none" }}>
               <div className="feature-card" style={{ cursor: "pointer" }}>
-                <div style={{ fontSize: 32, marginBottom: 16 }}>📊</div>
+                <div style={{ fontSize: 32, marginBottom: 16 }}>ðŸ“Š</div>
                 <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Symptom Tracker</h3>
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
                   Log 10 TSW-specific symptoms daily with intuitive sliders. Track itching, redness, nerve pain, thermal regulation, and more.
@@ -386,7 +391,7 @@ export default function LandingPage() {
 
             <a href="/progress" style={{ textDecoration: "none" }}>
               <div className="feature-card" style={{ cursor: "pointer" }}>
-                <div style={{ fontSize: 32, marginBottom: 16 }}>📈</div>
+                <div style={{ fontSize: 32, marginBottom: 16 }}>ðŸ“ˆ</div>
                 <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Progress Charts</h3>
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
                   Visualize your healing journey with interactive charts. See trends over 7 to 90 days and track what's improving.
@@ -395,7 +400,7 @@ export default function LandingPage() {
             </a>
 
             <div className="feature-card">
-              <div style={{ fontSize: 32, marginBottom: 16 }}>⚠️</div>
+              <div style={{ fontSize: 32, marginBottom: 16 }}>âš ï¸</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Steroid alert system</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
                 Every treatment is clearly flagged: steroid-free or contains steroids. No hidden ingredients. You always know what you're putting on your body.
@@ -403,7 +408,7 @@ export default function LandingPage() {
             </div>
 
             <div className="feature-card">
-              <div style={{ fontSize: 32, marginBottom: 16 }}>🫁</div>
+              <div style={{ fontSize: 32, marginBottom: 16 }}>ðŸ«</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Panic button</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
                 Instant calming support when things get overwhelming. Breathing exercises, grounding techniques, comfort sounds, and the option to alert your safety circle.
@@ -411,7 +416,7 @@ export default function LandingPage() {
             </div>
 
             <div className="feature-card">
-              <div style={{ fontSize: 32, marginBottom: 16 }}>🔬</div>
+              <div style={{ fontSize: 32, marginBottom: 16 }}>ðŸ”¬</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Verified information only</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
                 Every study cited is real. Every statistic is sourced. BALM never makes things up. When evidence is limited, BALM says so honestly.
@@ -419,7 +424,7 @@ export default function LandingPage() {
             </div>
 
             <div className="feature-card">
-              <div style={{ fontSize: 32, marginBottom: 16 }}>🕊️</div>
+              <div style={{ fontSize: 32, marginBottom: 16 }}>ðŸ•Šï¸</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Spiritual support</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
                 Completely optional. If faith is part of your strength, BALM can weave scripture and spiritual comfort into your conversations. Six traditions supported.
@@ -444,7 +449,7 @@ export default function LandingPage() {
                 "At 3am when my skin is on fire and I can't sleep, I don't need a symptom tracker. I need someone to tell me I'm going to be okay."
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600, marginTop: 16 }}>
-                — What BALM was built for
+                â€” What BALM was built for
               </p>
             </div>
 
@@ -453,7 +458,7 @@ export default function LandingPage() {
                 "I feel so guilty for putting steroids on my baby. Every time I look at her skin I blame myself."
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600, marginTop: 16 }}>
-                — BALM validates parents. "You followed your doctor's advice. This is not your fault."
+                â€” BALM validates parents. "You followed your doctor's advice. This is not your fault."
               </p>
             </div>
 
@@ -462,7 +467,7 @@ export default function LandingPage() {
                 "I don't know how to help my girlfriend. She won't leave the house and I feel like I'm making it worse."
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600, marginTop: 16 }}>
-                — BALM teaches supporters what TSW is, what to say, and what not to say.
+                â€” BALM teaches supporters what TSW is, what to say, and what not to say.
               </p>
             </div>
           </div>
@@ -498,13 +503,13 @@ export default function LandingPage() {
             You don't have to do this alone.
           </h2>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, color: "rgba(255,255,255,0.8)", lineHeight: 1.7, marginBottom: 40 }}>
-            BALM is here whenever you need — at 3am, after a bad doctor visit, on the good days and the hard ones.
+            BALM is here whenever you need â€” at 3am, after a bad doctor visit, on the good days and the hard ones.
           </p>
           <button className="btn-primary" style={{ background: "white", color: BALM_GREEN, fontSize: 18, padding: "18px 48px" }}
             onMouseOver={(e) => { e.target.style.background = WARM_CREAM; e.target.style.transform = "translateY(-2px)"; }}
             onMouseOut={(e) => { e.target.style.background = "white"; e.target.style.transform = "translateY(0)"; }}
           >
-            Start Your Journey — Free
+            Start Your Journey â€” Free
           </button>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 20 }}>
             No credit card. No paywalls on the support that matters.
@@ -516,12 +521,12 @@ export default function LandingPage() {
       <footer style={{ padding: "40px", background: DEEP_FOREST, textAlign: "center" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16 }}>
           <div style={{ width: 28, height: 28, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ color: "white", fontSize: 14 }}>✦</span>
+            <span style={{ color: "white", fontSize: 14 }}>âœ¦</span>
           </div>
           <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 16, color: "white" }}>TSW Coach</span>
         </div>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>
-          BALM — Beyond Addiction, Life Mentor
+          BALM â€” Beyond Addiction, Life Mentor
         </p>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.25)" }}>
           TSW Coach is not a substitute for medical advice. Always consult your healthcare provider.
@@ -531,6 +536,7 @@ export default function LandingPage() {
   );
 }
 import { useState, useEffect } from "react";
+import { getProfile } from "@/lib/profile";
 
 // TSW Coach Landing Page
 // Warm, calming design that communicates safety and understanding
@@ -546,6 +552,10 @@ const MUTED_TEAL = "#5BA68A";
 export default function LandingPage() {
   const [scrollY, setScrollY] = useState(0);
   const [showNav, setShowNav] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
+  useEffect(() => { const p = getProfile(); if (p && p.firstName) setLoggedIn(true); }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -714,24 +724,24 @@ export default function LandingPage() {
         <div className="nav-fixed">
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: "white", fontSize: 16 }}>✦</span>
+              <span style={{ color: "white", fontSize: 16 }}>âœ¦</span>
             </div>
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 18, color: DEEP_FOREST }}>TSW Coach</span>
           </div>
           <div style={{ display: "flex", gap: 12 }}>
-            <button className="btn-secondary" style={{ padding: "10px 24px", fontSize: 14 }}>Log In</button>
-            <button className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }}>Get Started Free</button>
+            {loggedIn ? (<><button onClick={() => window.location.href="/chat"} className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }}>Go to BALM</button><button onClick={() => setShowMenu(!showMenu)} style={{ width: 40, height: 40, background: "white", border: "1px solid rgba(27,107,74,0.2)", borderRadius: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{"\u2630"}</button></>) : (<><button onClick={() => window.location.href="/auth"} className="btn-secondary" style={{ padding: "10px 24px", fontSize: 14 }}>Log In</button><button onClick={() => window.location.href="/onboarding"} className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }}>Get Started Free</button></>)}
           </div>
         </div>
       )}
 
+      {showMenu && (<div style={{ position: "fixed", top: 60, right: 24, background: "white", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.12)", zIndex: 200, minWidth: 200, overflow: "hidden" }}>{[{ label: "Talk to BALM", path: "/chat", icon: "\uD83D\uDCAC" }, { label: "Symptom Tracker", path: "/tracker", icon: "\uD83D\uDCCA" }, { label: "Progress", path: "/progress", icon: "\uD83D\uDCC8" }, { label: "Community", path: "/community", icon: "\uD83E\uDD1D" }, { label: "News & Research", path: "/news", icon: "\uD83D\uDCF0" }, { label: "Safety Circle", path: "/safety-circle", icon: "\uD83D\uDEE1\uFE0F" }, { label: "Settings", path: "/settings", icon: "\u2699\uFE0F" }].map(function(item) { return <button key={item.path} onClick={() => { setShowMenu(false); window.location.href=item.path; }} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "14px 20px", background: "transparent", border: "none", borderBottom: "1px solid rgba(27,107,74,0.06)", cursor: "pointer", fontSize: 15, color: "#1a1a1a", fontFamily: "DM Sans, sans-serif" }}><span>{item.icon}</span><span>{item.label}</span></button>; })}</div>)}
       {/* HERO */}
       <section className="hero-gradient" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         {/* Top bar */}
         <div style={{ padding: "24px 40px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 40, height: 40, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: "white", fontSize: 20 }}>✦</span>
+              <span style={{ color: "white", fontSize: 20 }}>âœ¦</span>
             </div>
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 20, color: DEEP_FOREST }}>TSW Coach</span>
           </div>
@@ -781,23 +791,23 @@ export default function LandingPage() {
                 marginBottom: 36,
                 maxWidth: 520,
               }}>
-                BALM is your AI coach who understands TSW — the science, the treatments, the emotional toll. Available 24/7 for the moments when you need someone who gets it.
+                BALM is your AI coach who understands TSW â€” the science, the treatments, the emotional toll. Available 24/7 for the moments when you need someone who gets it.
               </p>
 
               <div className="fade-in fade-in-delay-3" style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-                <button className="btn-primary">Start Your Journey — Free</button>
-                <button className="btn-secondary">Learn More ↓</button>
+                <button className="btn-primary">Start Your Journey â€” Free</button>
+                <button className="btn-secondary">Learn More â†“</button>
               </div>
 
               <div className="fade-in fade-in-delay-4" style={{ marginTop: 32, display: "flex", gap: 32, flexWrap: "wrap" }}>
                 <div>
-                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600 }}>✓ Free for patients & caregivers</span>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600 }}>âœ“ Free for patients & caregivers</span>
                 </div>
                 <div>
-                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600 }}>✓ Source-verified info</span>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600 }}>âœ“ Source-verified info</span>
                 </div>
                 <div>
-                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600 }}>✓ No steroids promoted</span>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600 }}>âœ“ No steroids promoted</span>
                 </div>
               </div>
             </div>
@@ -825,7 +835,7 @@ export default function LandingPage() {
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                     <div style={{ width: 28, height: 28, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <span style={{ color: "white", fontSize: 12 }}>✦</span>
+                      <span style={{ color: "white", fontSize: 12 }}>âœ¦</span>
                     </div>
                     <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 14, color: BALM_GREEN }}>BALM</span>
                   </div>
@@ -847,14 +857,14 @@ export default function LandingPage() {
             TSW doesn't just affect one person
           </h2>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 17, color: "#6B7D73", maxWidth: 600, margin: "0 auto 60px", lineHeight: 1.7 }}>
-            Whether you're going through it yourself, watching your child suffer, or supporting someone you love — BALM adapts to your journey.
+            Whether you're going through it yourself, watching your child suffer, or supporting someone you love â€” BALM adapts to your journey.
           </p>
 
           <div className="roles-grid" style={{ display: "flex", gap: 28, justifyContent: "center" }}>
             {/* Self */}
             <div className="role-card" style={{ flex: 1, maxWidth: 300 }}>
               <div style={{ width: 64, height: 64, borderRadius: "50%", background: SAGE_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 28 }}>
-                🤍
+                ðŸ¤
               </div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 12, color: DEEP_FOREST }}>I have TSW</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -865,7 +875,7 @@ export default function LandingPage() {
             {/* Parent */}
             <div className="role-card" style={{ flex: 1, maxWidth: 300 }}>
               <div style={{ width: 64, height: 64, borderRadius: "50%", background: SAGE_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 28 }}>
-                🤍
+                ðŸ¤
               </div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 12, color: DEEP_FOREST }}>My child has TSW</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -876,7 +886,7 @@ export default function LandingPage() {
             {/* Supporter */}
             <div className="role-card" style={{ flex: 1, maxWidth: 300 }}>
               <div style={{ width: 64, height: 64, borderRadius: "50%", background: SAGE_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 28 }}>
-                🤍
+                ðŸ¤
               </div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 12, color: DEEP_FOREST }}>Someone I love has TSW</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -899,15 +909,15 @@ export default function LandingPage() {
 
           <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
             <div className="feature-card">
-              <div style={{ fontSize: 32, marginBottom: 16 }}>💬</div>
+              <div style={{ fontSize: 32, marginBottom: 16 }}>ðŸ’¬</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Talk to BALM anytime</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
-                An AI coach trained on real TSW research. Not generic chatbot responses — BALM knows the NIH studies, the treatments, and what 3am with TSW feels like.
+                An AI coach trained on real TSW research. Not generic chatbot responses â€” BALM knows the NIH studies, the treatments, and what 3am with TSW feels like.
               </p>
             </div>
 
             <div className="feature-card">
-              <div style={{ fontSize: 32, marginBottom: 16 }}>📊</div>
+              <div style={{ fontSize: 32, marginBottom: 16 }}>ðŸ“Š</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Track your healing</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
                 Daily check-ins that track symptoms, sleep, mood, and treatments over time. See the progress that's invisible day to day.
@@ -915,7 +925,7 @@ export default function LandingPage() {
             </div>
 
             <div className="feature-card">
-              <div style={{ fontSize: 32, marginBottom: 16 }}>⚠️</div>
+              <div style={{ fontSize: 32, marginBottom: 16 }}>âš ï¸</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Steroid alert system</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
                 Every treatment is clearly flagged: steroid-free or contains steroids. No hidden ingredients. You always know what you're putting on your body.
@@ -923,7 +933,7 @@ export default function LandingPage() {
             </div>
 
             <div className="feature-card">
-              <div style={{ fontSize: 32, marginBottom: 16 }}>🫁</div>
+              <div style={{ fontSize: 32, marginBottom: 16 }}>ðŸ«</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Panic button</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
                 Instant calming support when things get overwhelming. Breathing exercises, grounding techniques, comfort sounds, and the option to alert your safety circle.
@@ -931,7 +941,7 @@ export default function LandingPage() {
             </div>
 
             <div className="feature-card">
-              <div style={{ fontSize: 32, marginBottom: 16 }}>🔬</div>
+              <div style={{ fontSize: 32, marginBottom: 16 }}>ðŸ”¬</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Verified information only</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
                 Every study cited is real. Every statistic is sourced. BALM never makes things up. When evidence is limited, BALM says so honestly.
@@ -939,7 +949,7 @@ export default function LandingPage() {
             </div>
 
             <div className="feature-card">
-              <div style={{ fontSize: 32, marginBottom: 16 }}>🕊️</div>
+              <div style={{ fontSize: 32, marginBottom: 16 }}>ðŸ•Šï¸</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Spiritual support</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
                 Completely optional. If faith is part of your strength, BALM can weave scripture and spiritual comfort into your conversations. Six traditions supported.
@@ -964,7 +974,7 @@ export default function LandingPage() {
                 "At 3am when my skin is on fire and I can't sleep, I don't need a symptom tracker. I need someone to tell me I'm going to be okay."
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600, marginTop: 16 }}>
-                — What BALM was built for
+                â€” What BALM was built for
               </p>
             </div>
 
@@ -973,7 +983,7 @@ export default function LandingPage() {
                 "I feel so guilty for putting steroids on my baby. Every time I look at her skin I blame myself."
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600, marginTop: 16 }}>
-                — BALM validates parents. "You followed your doctor's advice. This is not your fault."
+                â€” BALM validates parents. "You followed your doctor's advice. This is not your fault."
               </p>
             </div>
 
@@ -982,7 +992,7 @@ export default function LandingPage() {
                 "I don't know how to help my girlfriend. She won't leave the house and I feel like I'm making it worse."
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: MUTED_TEAL, fontWeight: 600, marginTop: 16 }}>
-                — BALM teaches supporters what TSW is, what to say, and what not to say.
+                â€” BALM teaches supporters what TSW is, what to say, and what not to say.
               </p>
             </div>
           </div>
@@ -1018,13 +1028,13 @@ export default function LandingPage() {
             You don't have to do this alone.
           </h2>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, color: "rgba(255,255,255,0.8)", lineHeight: 1.7, marginBottom: 40 }}>
-            BALM is here whenever you need — at 3am, after a bad doctor visit, on the good days and the hard ones.
+            BALM is here whenever you need â€” at 3am, after a bad doctor visit, on the good days and the hard ones.
           </p>
           <button className="btn-primary" style={{ background: "white", color: BALM_GREEN, fontSize: 18, padding: "18px 48px" }}
             onMouseOver={(e) => { e.target.style.background = WARM_CREAM; e.target.style.transform = "translateY(-2px)"; }}
             onMouseOut={(e) => { e.target.style.background = "white"; e.target.style.transform = "translateY(0)"; }}
           >
-            Start Your Journey — Free
+            Start Your Journey â€” Free
           </button>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 20 }}>
             No credit card. No paywalls on the support that matters.
@@ -1036,12 +1046,12 @@ export default function LandingPage() {
       <footer style={{ padding: "40px", background: DEEP_FOREST, textAlign: "center" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16 }}>
           <div style={{ width: 28, height: 28, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ color: "white", fontSize: 14 }}>✦</span>
+            <span style={{ color: "white", fontSize: 14 }}>âœ¦</span>
           </div>
           <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 16, color: "white" }}>TSW Coach</span>
         </div>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>
-          BALM — Beyond Addiction, Life Mentor
+          BALM â€” Beyond Addiction, Life Mentor
         </p>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.25)" }}>
           TSW Coach is not a substitute for medical advice. Always consult your healthcare provider.
@@ -1050,3 +1060,7 @@ export default function LandingPage() {
     </div>
   );
 }
+
+
+
+
