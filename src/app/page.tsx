@@ -48,6 +48,19 @@ export default function Home() {
           );
         }
         
+        .scroll-reveal {
+          opacity: 0;
+          transform: translateY(40px);
+          transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        @keyframes breatheGradient {
+          0%, 100% { background-position: 50% 50%; }
+          25% { background-position: 45% 45%; }
+          50% { background-position: 50% 55%; }
+          75% { background-position: 55% 50%; }
+        }
+
         .float-gentle {
           animation: floatGentle 6s ease-in-out infinite;
         }
@@ -326,7 +339,7 @@ export default function Home() {
       {/* WHO THIS IS FOR */}
       <section id="about" style={{ padding: "100px 40px", background: "white" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto", textAlign: "center" }}>
-          <div className="section-label">Who BALM is for</div>
+          <div className="section-label scroll-reveal">Who BALM is for</div>
           <h2 style={{ fontSize: 38, fontWeight: 600, marginBottom: 16, color: DEEP_FOREST }}>
             TSW doesn't just affect one person
           </h2>
@@ -336,9 +349,9 @@ export default function Home() {
 
           <div className="roles-grid" style={{ display: "flex", gap: 28, justifyContent: "center" }}>
             {/* Self */}
-            <div className="role-card" style={{ flex: 1, maxWidth: 300 }}>
+            <div className="role-card scroll-reveal" style={{ flex: 1, maxWidth: 300 }}>
               <div style={{ width: 64, height: 64, borderRadius: "50%", background: SAGE_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 28 }}>
-                🤍
+                🌿
               </div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 12, color: DEEP_FOREST }}>I have TSW</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -347,9 +360,9 @@ export default function Home() {
             </div>
 
             {/* Parent */}
-            <div className="role-card" style={{ flex: 1, maxWidth: 300 }}>
+            <div className="role-card scroll-reveal" style={{ flex: 1, maxWidth: 300 }}>
               <div style={{ width: 64, height: 64, borderRadius: "50%", background: SAGE_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 28 }}>
-                🤍
+                🌿
               </div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 12, color: DEEP_FOREST }}>My child has TSW</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -358,9 +371,9 @@ export default function Home() {
             </div>
 
             {/* Supporter */}
-            <div className="role-card" style={{ flex: 1, maxWidth: 300 }}>
+            <div className="role-card scroll-reveal" style={{ flex: 1, maxWidth: 300 }}>
               <div style={{ width: 64, height: 64, borderRadius: "50%", background: SAGE_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 28 }}>
-                🤍
+                🌿
               </div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 12, color: DEEP_FOREST }}>Someone I love has TSW</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -375,14 +388,14 @@ export default function Home() {
       <section id="features" style={{ padding: "100px 40px", background: WARM_CREAM }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <div className="section-label">What BALM does</div>
+            <div className="section-label scroll-reveal">What BALM does</div>
             <h2 style={{ fontSize: 38, fontWeight: 600, color: DEEP_FOREST }}>
               More than an app. A companion.
             </h2>
           </div>
 
           <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-            <div className="feature-card">
+            <div className="feature-card scroll-reveal">
               <div style={{ fontSize: 32, marginBottom: 16 }}>💬</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Talk to BALM anytime</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -390,7 +403,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="feature-card">
+            <div className="feature-card scroll-reveal">
               <div style={{ fontSize: 32, marginBottom: 16 }}>📊</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Track your healing</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -398,7 +411,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="feature-card">
+            <div className="feature-card scroll-reveal">
               <div style={{ fontSize: 32, marginBottom: 16 }}>⚠️</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Steroid alert system</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -406,7 +419,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="feature-card">
+            <div className="feature-card scroll-reveal">
               <div style={{ fontSize: 32, marginBottom: 16 }}>🫁</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Panic button</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -414,7 +427,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="feature-card">
+            <div className="feature-card scroll-reveal">
               <div style={{ fontSize: 32, marginBottom: 16 }}>🔬</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Verified information only</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -422,7 +435,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="feature-card">
+            <div className="feature-card scroll-reveal">
               <div style={{ fontSize: 32, marginBottom: 16 }}>🕊️</div>
               <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 10, color: DEEP_FOREST }}>Spiritual support</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B7D73", lineHeight: 1.7 }}>
@@ -436,14 +449,14 @@ export default function Home() {
       {/* BALM DIFFERENCE */}
       <section style={{ padding: "100px 40px", background: "white" }}>
         <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
-          <div className="section-label">The BALM difference</div>
+          <div className="section-label scroll-reveal">The BALM difference</div>
           <h2 style={{ fontSize: 38, fontWeight: 600, marginBottom: 40, color: DEEP_FOREST }}>
             Coaching you through every flare, every sleepless night.<br />
             <span style={{ color: BALM_GREEN, fontStyle: "italic" }}>Real TSW guidance.</span>
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 24, textAlign: "left" }}>
-            <div className="testimonial-card">
+            <div className="testimonial-card scroll-reveal">
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, lineHeight: 1.8, color: "#4A5D52", fontStyle: "italic" }}>
                 "At 3am when my skin is on fire and I can't sleep, I don't need a symptom tracker. I need someone to tell me I'm going to be okay."
               </p>
@@ -452,7 +465,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="testimonial-card">
+            <div className="testimonial-card scroll-reveal">
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, lineHeight: 1.8, color: "#4A5D52", fontStyle: "italic" }}>
                 "I feel so guilty for putting steroids on my baby. Every time I look at her skin I blame myself."
               </p>
@@ -461,7 +474,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="testimonial-card">
+            <div className="testimonial-card scroll-reveal">
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, lineHeight: 1.8, color: "#4A5D52", fontStyle: "italic" }}>
                 "I don't know how to help my girlfriend. She won't leave the house and I feel like I'm making it worse."
               </p>
