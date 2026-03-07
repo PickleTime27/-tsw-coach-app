@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { getProfile, clearProfile } from "@/lib/profile";
 import { getProfile } from "@/lib/profile";
 
 // TSW Coach Landing Page
@@ -16,6 +17,10 @@ const MUTED_TEAL = "#5BA68A";
 export default function Home() {
  
   const [showNav, setShowNav] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
+  useEffect(() => { const p = getProfile(); if (p && p.firstName) setLoggedIn(true); }, []);
   const [loggedIn, setLoggedIn] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -193,13 +198,14 @@ export default function Home() {
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 18, color: DEEP_FOREST }}>TSW Coach</span>
           </div>
           <div style={{ display: "flex", gap: 12 }}>
-            <button className="btn-secondary" style={{ padding: "10px 24px", fontSize: 14 }} onClick={() => window.location.href="/auth"}>Log In</button>
-            <button className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }} onClick={() => window.location.href="/auth"}>Get Started Free</button>
+            {loggedIn ? (<><button onClick={() => window.location.href="/chat"} className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }}>Go to BALM</button><button onClick={() => setShowMenu(!showMenu)} style={{ width: 40, height: 40, background: "white", border: "1px solid rgba(27,107,74,0.2)", borderRadius: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{"\u2630"}</button></>) : (<>{loggedIn ? (<><button onClick={() => window.location.href="/chat"} className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }}>Go to BALM</button><button onClick={() => setShowMenu(!showMenu)} style={{ width: 40, height: 40, background: "white", border: "1px solid rgba(27,107,74,0.2)", borderRadius: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{"\u2630"}</button></>) : (<><button className="btn-secondary" style={{ padding: "10px 24px", fontSize: 14 }} onClick={() => window.location.href="/auth"}>Log In</button>
+            <button className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }} onClick={() => window.location.href="/auth"}>Get Started Free</button></>)}
           </div>
         </div>
       )}
 
       {showMenu && (<div style={{ position: "fixed", top: 60, right: 24, background: "white", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.12)", zIndex: 200, minWidth: 200, overflow: "hidden" }}>{[{l:"Talk to BALM",p:"/chat",i:"\uD83D\uDCAC"},{l:"Tracker",p:"/tracker",i:"\uD83D\uDCCA"},{l:"Progress",p:"/progress",i:"\uD83D\uDCC8"},{l:"Community",p:"/community",i:"\uD83E\uDD1D"},{l:"News",p:"/news",i:"\uD83D\uDCF0"},{l:"Safety Circle",p:"/safety-circle",i:"\uD83D\uDEE1\uFE0F"},{l:"Settings",p:"/settings",i:"\u2699\uFE0F"}].map(function(x){return <button key={x.p} onClick={()=>{setShowMenu(false);window.location.href=x.p}} style={{display:"flex",alignItems:"center",gap:12,width:"100%",padding:"14px 20px",background:"transparent",border:"none",borderBottom:"1px solid rgba(27,107,74,0.06)",cursor:"pointer",fontSize:15,color:"#1a1a1a",fontFamily:"DM Sans,sans-serif"}}><span>{x.i}</span><span>{x.l}</span></button>})}</div>)}
+      {showMenu && (<div style={{ position: "fixed", top: 60, right: 24, background: "white", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.12)", zIndex: 200, minWidth: 200, overflow: "hidden" }}>{[{l:"Talk to BALM",p:"/chat",i:"\uD83D\uDCAC"},{l:"Tracker",p:"/tracker",i:"\uD83D\uDCCA"},{l:"Progress",p:"/progress",i:"\uD83D\uDCC8"},{l:"Community",p:"/community",i:"\uD83E\uDD1D"},{l:"News",p:"/news",i:"\uD83D\uDCF0"},{l:"Safety Circle",p:"/safety-circle",i:"\uD83D\uDEE1\uFE0F"},{l:"Settings",p:"/settings",i:"\u2699\uFE0F"}].map(function(x){return <button key={x.p} onClick={()=>{setShowMenu(false);window.location.href=x.p}} style={{display:"flex",alignItems:"center",gap:12,width:"100%",padding:"14px 20px",background:"transparent",border:"none",borderBottom:"1px solid rgba(27,107,74,0.06)",cursor:"pointer",fontSize:15,color:"#1a1a1a",fontFamily:"DM Sans,sans-serif"}}><span>{x.i}</span><span>{x.l}</span></button>})}<button onClick={()=>{clearProfile();setLoggedIn(false);setShowMenu(false);window.location.href="/";}} style={{display:"flex",alignItems:"center",gap:12,width:"100%",padding:"14px 20px",background:"transparent",border:"none",cursor:"pointer",fontSize:15,color:"#cc3333",fontFamily:"DM Sans,sans-serif"}}><span>{"\uD83D\uDEAA"}</span><span>Log Out</span></button></div>)}
       {/* HERO */}
       <section className="hero-gradient" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         {/* Top bar */}
@@ -214,7 +220,7 @@ export default function Home() {
             <a href="#about" className="hide-mobile" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: DEEP_FOREST, textDecoration: "none", opacity: 0.7 }}>About</a>
             <a href="#features" className="hide-mobile" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: DEEP_FOREST, textDecoration: "none", opacity: 0.7 }}>Features</a>
             <button className="btn-secondary" style={{ padding: "10px 24px", fontSize: 14 }} onClick={() => window.location.href="/auth"}>Log In</button>
-            <button className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }} onClick={() => window.location.href="/auth"}>Get Started</button>
+            <button className="btn-primary" style={{ padding: "10px 24px", fontSize: 14 }} onClick={() => window.location.href="/auth"}>Get Started</button></>)}
           </div>
         </div>
 
