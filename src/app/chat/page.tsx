@@ -1,4 +1,5 @@
 "use client";
+
 import { getProfile } from "@/lib/profile";
 import { supabase } from "@/lib/supabase";
 import { useState, useRef, useEffect } from "react";
@@ -16,6 +17,24 @@ interface Message {
   content: string;
   timestamp: Date;
 }
+
+interface SoundOption {
+  id: string;
+  name: string;
+  emoji: string;
+  description: string;
+  frequencies: number[];
+  type: "tone" | "binaural" | "ambient";
+}
+
+const HEALING_SOUNDS: SoundOption[] = [
+  { id: "432hz", name: "432 Hz", emoji: "\uD83C\uDFB5", description: "Earth\u2019s frequency \u2014 deep calm", frequencies: [432], type: "tone" },
+  { id: "528hz", name: "528 Hz", emoji: "\uD83C\uDFB6", description: "Love frequency \u2014 healing & peace", frequencies: [528], type: "tone" },
+  { id: "174hz", name: "174 Hz", emoji: "\uD83E\uDEF6", description: "Pain relief \u2014 body relaxation", frequencies: [174], type: "tone" },
+  { id: "binaural", name: "Deep Relax", emoji: "\uD83E\uDDE0", description: "Binaural beat \u2014 theta waves", frequencies: [200, 206], type: "binaural" },
+  { id: "ocean", name: "Ocean Waves", emoji: "\uD83C\uDF0A", description: "Gentle shoreline sounds", frequencies: [], type: "ambient" },
+  { id: "rain", name: "Soft Rain", emoji: "\uD83C\uDF27\uFE0F", description: "Peaceful rainfall", frequencies: [], type: "ambient" },
+];
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([
@@ -37,10 +56,15 @@ export default function Chat() {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [panicMode, setPanicMode] = useState("breathe");
   const [groundStep, setGroundStep] = useState(0);
+  const [activeSound, setActiveSound] = useState<string | null>(null);
+  const [soundVolume, setSoundVolume] = useState(0.3);
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const breathTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioNodesRef = useRef<AudioNode[]>([]);
+  const gainNodeRef = useRef<GainNode | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -53,8 +77,10 @@ export default function Chat() {
   useEffect(() => {
     return () => {
       if (breathTimerRef.current) clearTimeout(breathTimerRef.current);
+      stopSound();
     };
   }, []);
+
   useEffect(() => {
     const p = getProfile();
     if (p && p.firstName) {
@@ -64,7 +90,9 @@ export default function Chat() {
           setProfileId(pid);
           supabase.from("messages").select("*").eq("profile_id", pid).order("created_at", { ascending: true }).then(function(msgRes) {
             if (msgRes.data && msgRes.data.length > 0) {
-              setMessages(msgRes.data.map(function(m, i) { return { id: i.toString(), role: m.role, content: m.content, timestamp: new Date(m.created_at) }; }));
+              setMessages(msgRes.data.map(function(m: { role: "user" | "assistant"; content: string; created_at: string }, i: number) {
+                return { id: i.toString(), role: m.role, content: m.content, timestamp: new Date(m.created_at) };
+              }));
             }
           });
         }
@@ -72,6 +100,149 @@ export default function Chat() {
     }
   }, []);
 
+  // --- Sound Engine ---
+  const stopSound = () => {
+    audioNodesRef.current.forEach((node) => {
+      try {
+        if (node instanceof OscillatorNode) node.stop();
+        if (node instanceof AudioBufferSourceNode) node.stop();
+        node.disconnect();
+      } catch { /* already stopped */ }
+    });
+    audioNodesRef.current = [];
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    gainNodeRef.current = null;
+    setActiveSound(null);
+  };
+
+  const playTone = (freq: number) => {
+    const ctx = new AudioContext();
+    audioContextRef.current = ctx;
+    const gain = ctx.createGain();
+    gain.gain.value = soundVolume;
+    gainNodeRef.current = gain;
+    gain.connect(ctx.destination);
+
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    osc.connect(gain);
+    osc.start();
+    audioNodesRef.current.push(osc);
+
+    const osc2 = ctx.createOscillator();
+    osc2.type = "sine";
+    osc2.frequency.value = freq / 2;
+    const gain2 = ctx.createGain();
+    gain2.gain.value = soundVolume * 0.3;
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start();
+    audioNodesRef.current.push(osc2, gain2);
+  };
+
+  const playBinaural = (freqs: number[]) => {
+    const ctx = new AudioContext();
+    audioContextRef.current = ctx;
+    const merger = ctx.createChannelMerger(2);
+    merger.connect(ctx.destination);
+
+    const oscL = ctx.createOscillator();
+    oscL.type = "sine";
+    oscL.frequency.value = freqs[0];
+    const gainL = ctx.createGain();
+    gainL.gain.value = soundVolume;
+    oscL.connect(gainL);
+    gainL.connect(merger, 0, 0);
+    oscL.start();
+
+    const oscR = ctx.createOscillator();
+    oscR.type = "sine";
+    oscR.frequency.value = freqs[1];
+    const gainR = ctx.createGain();
+    gainR.gain.value = soundVolume;
+    oscR.connect(gainR);
+    gainR.connect(merger, 0, 1);
+    oscR.start();
+
+    audioNodesRef.current.push(oscL, oscR, gainL, gainR, merger);
+  };
+
+  const playAmbient = (type: string) => {
+    const ctx = new AudioContext();
+    audioContextRef.current = ctx;
+    const gain = ctx.createGain();
+    gain.gain.value = soundVolume;
+    gainNodeRef.current = gain;
+    gain.connect(ctx.destination);
+
+    const bufferSize = ctx.sampleRate * 4;
+    const buffer = ctx.createBuffer(2, bufferSize, ctx.sampleRate);
+
+    for (let channel = 0; channel < 2; channel++) {
+      const data = buffer.getChannelData(channel);
+      if (type === "ocean") {
+        let lastOut = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          lastOut = (lastOut + (0.02 * white)) / 1.02;
+          const wave = Math.sin(i / (ctx.sampleRate * 3)) * 0.5 + 0.5;
+          const wave2 = Math.sin(i / (ctx.sampleRate * 7)) * 0.3 + 0.7;
+          data[i] = lastOut * 3.5 * wave * wave2;
+        }
+      } else if (type === "rain") {
+        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.96900 * b2 + white * 0.1538520;
+          b3 = 0.86650 * b3 + white * 0.3104856;
+          b4 = 0.55000 * b4 + white * 0.5329522;
+          b5 = -0.7616 * b5 - white * 0.0168980;
+          const pink = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+          b6 = white * 0.115926;
+          const droplet = Math.random() > 0.9997 ? (Math.random() * 0.3) : 0;
+          data[i] = (pink * 0.11) + droplet;
+        }
+      }
+    }
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.connect(gain);
+    source.start();
+    audioNodesRef.current.push(source);
+  };
+
+  const toggleSound = (sound: SoundOption) => {
+    if (activeSound === sound.id) {
+      stopSound();
+      return;
+    }
+    stopSound();
+    setActiveSound(sound.id);
+    if (sound.type === "tone") {
+      playTone(sound.frequencies[0]);
+    } else if (sound.type === "binaural") {
+      playBinaural(sound.frequencies);
+    } else if (sound.type === "ambient") {
+      playAmbient(sound.id);
+    }
+  };
+
+  const updateVolume = (vol: number) => {
+    setSoundVolume(vol);
+    if (gainNodeRef.current) {
+      gainNodeRef.current.gain.value = vol;
+    }
+  };
+
+  // --- Breathing ---
   const startBreathing = () => {
     if (breathActive) return;
     setBreathActive(true);
@@ -79,24 +250,17 @@ export default function Chat() {
   };
 
   const runBreathCycle = (count: number) => {
-    // Breathe in - 4 seconds
     setBreathPhase("in");
     setBreathText("Breathe in...");
-
     breathTimerRef.current = setTimeout(() => {
-      // Hold - 4 seconds
       setBreathPhase("hold");
       setBreathText("Hold...");
-
       breathTimerRef.current = setTimeout(() => {
-        // Breathe out - 4 seconds
         setBreathPhase("out");
         setBreathText("Breathe out...");
-
         breathTimerRef.current = setTimeout(() => {
           const newCount = count + 1;
           setBreathCount(newCount);
-
           if (newCount < 5) {
             runBreathCycle(newCount);
           } else {
@@ -119,9 +283,11 @@ export default function Chat() {
 
   const handleClosePanic = () => {
     resetBreathing();
+    stopSound();
     setShowPanic(false);
   };
 
+  // --- Chat ---
   const handleSend = async () => {
     if (input.trim() === "" || isLoading) return;
 
@@ -131,7 +297,15 @@ export default function Chat() {
       content: input.trim(),
       timestamp: new Date(),
     };
-    var prof = getProfile(); if (prof && prof.profileId) { supabase.from("messages").insert({ profile_id: prof.profileId, role: "user", content: userMessage.content }).then(function(x) { console.log("user msg saved", x); }); }
+
+    var prof = getProfile();
+    if (prof && prof.profileId) {
+      supabase.from("messages").insert({
+        profile_id: prof.profileId,
+        role: "user",
+        content: userMessage.content
+      }).then(function(x) { console.log("user msg saved", x); });
+    }
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -145,10 +319,7 @@ export default function Chat() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: chatHistory,
-          userProfile: getProfile(),
-        }),
+        body: JSON.stringify({ messages: chatHistory, userProfile: getProfile() }),
       });
 
       const data = await response.json();
@@ -162,7 +333,14 @@ export default function Chat() {
         };
         setMessages((prev) => [...prev, balmResponse]);
       } else {
-        var prof2 = getProfile(); if (prof2 && prof2.profileId) { supabase.from("messages").insert({ profile_id: prof2.profileId, role: "assistant", content: data.message }).then(function(x) { console.log("balm msg saved", x); }); }
+        var prof2 = getProfile();
+        if (prof2 && prof2.profileId) {
+          supabase.from("messages").insert({
+            profile_id: prof2.profileId,
+            role: "assistant",
+            content: data.message
+          }).then(function(x) { console.log("balm msg saved", x); });
+        }
         const errorResponse: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
@@ -226,248 +404,137 @@ export default function Chat() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        .chat-textarea {
-          flex: 1;
-          border: none;
-          outline: none;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 16px;
-          color: #0D2818;
-          background: transparent;
-          resize: none;
-          line-height: 1.5;
-          padding: 0;
-        }
+        .chat-textarea { flex: 1; border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 16px; color: #0D2818; background: transparent; resize: none; line-height: 1.5; padding: 0; }
         .chat-textarea::placeholder { color: #A0B5A8; }
-        .send-btn {
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          background: #1B6B4A;
-          border: none;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s ease;
-          flex-shrink: 0;
-        }
+        .send-btn { width: 44px; height: 44px; border-radius: 50%; background: #1B6B4A; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0; }
         .send-btn:hover { background: #0D2818; transform: scale(1.05); }
         .send-btn:disabled { background: #B0D4B8; cursor: not-allowed; transform: none; }
-        .panic-btn {
-          padding: 8px 16px;
-          border-radius: 50px;
-          border: 2px solid #E8534A;
-          background: transparent;
-          color: #E8534A;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
+        .panic-btn { padding: 8px 16px; border-radius: 50px; border: 2px solid #E8534A; background: transparent; color: #E8534A; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
         .panic-btn:hover { background: #E8534A; color: white; }
-        .message-bubble {
-          max-width: 75%;
-          padding: 16px 20px;
-          border-radius: 20px;
-          line-height: 1.7;
-          font-size: 15px;
-          animation: fadeIn 0.3s ease;
-          white-space: pre-wrap;
-        }
+        .message-bubble { max-width: 75%; padding: 16px 20px; border-radius: 20px; line-height: 1.7; font-size: 15px; animation: fadeIn 0.3s ease; white-space: pre-wrap; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .typing-indicator span {
-          display: inline-block;
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: #5BA68A;
-          margin: 0 2px;
-          animation: bounce 1.4s infinite ease-in-out;
-        }
+        .typing-indicator span { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #5BA68A; margin: 0 2px; animation: bounce 1.4s infinite ease-in-out; }
         .typing-indicator span:nth-child(1) { animation-delay: 0s; }
         .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
         .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce {
-          0%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-8px); }
-        }
-        .panic-overlay {
-          position: fixed;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(10,10,15,0.92);
-          backdrop-filter: blur(16px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 200;
-          animation: fadeIn 0.4s ease;
-        }
-        .panic-card {
-          background: #1A1A2E;
-          border-radius: 28px;
-          padding: 48px 40px;
-          max-width: 440px;
-          width: 90%;
-          text-align: center;
-        }
-        .breath-circle {
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 28px;
-          cursor: pointer;
-          transition: width 4s ease-in-out, height 4s ease-in-out, background 2s ease, box-shadow 2s ease;
-        }
-        .progress-dots {
-          display: flex;
-          gap: 8px;
-          justify-content: center;
-          margin-bottom: 24px;
-        }
-        .progress-dot {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          transition: all 0.3s ease;
-        }
-        @keyframes sparkle {
-          0% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.2); opacity: 0.8; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        .sparkle-text {
-          animation: sparkle 0.6s ease;
-        }
+        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-8px); } }
+        .panic-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10,10,15,0.92); backdrop-filter: blur(16px); display: flex; align-items: center; justify-content: center; z-index: 200; animation: fadeIn 0.4s ease; }
+        .panic-card { background: #1A1A2E; border-radius: 28px; padding: 48px 40px; max-width: 440px; width: 90%; text-align: center; max-height: 90vh; overflow-y: auto; }
+        .breath-circle { border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 28px; cursor: pointer; transition: width 4s ease-in-out, height 4s ease-in-out, background 2s ease, box-shadow 2s ease; }
+        .progress-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; }
+        .progress-dot { width: 10px; height: 10px; border-radius: 50%; transition: all 0.3s ease; }
+        @keyframes sparkle { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+        .sparkle-text { animation: sparkle 0.6s ease; }
+        .sound-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px 16px; cursor: pointer; transition: all 0.3s ease; text-align: left; display: flex; align-items: center; gap: 12px; }
+        .sound-card:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+        .sound-card.active { background: rgba(91,166,138,0.2); border-color: rgba(91,166,138,0.5); box-shadow: 0 0 20px rgba(91,166,138,0.15); }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 8px rgba(91,166,138,0.3); } 50% { box-shadow: 0 0 20px rgba(91,166,138,0.6); } }
+        .sound-playing { animation: pulse-glow 2s ease-in-out infinite; }
+        .volume-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.15); outline: none; }
+        .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #5BA68A; cursor: pointer; }
+        .volume-slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #5BA68A; cursor: pointer; border: none; }
       `}</style>
 
       {/* PANIC MODE OVERLAY */}
       {showPanic && (
         <div className="panic-overlay">
           <div className="panic-card">
-            <div style={{display:"flex",gap:8,marginBottom:20}}><button onClick={()=>setPanicMode("breathe")} style={{flex:1,padding:"10px",borderRadius:10,border:"none",fontWeight:600,fontSize:14,cursor:"pointer",background:panicMode==="breathe"?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.05)",color:panicMode==="breathe"?"white":"rgba(255,255,255,0.4)"}}>Breathe</button><button onClick={()=>{setPanicMode("ground");setGroundStep(0);}} style={{flex:1,padding:"10px",borderRadius:10,border:"none",fontWeight:600,fontSize:14,cursor:"pointer",background:panicMode==="ground"?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.05)",color:panicMode==="ground"?"white":"rgba(255,255,255,0.4)"}}>Ground</button></div>
+            {/* Tab buttons */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+              <button onClick={() => setPanicMode("breathe")} style={{ flex: 1, padding: "10px", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", background: panicMode === "breathe" ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.05)", color: panicMode === "breathe" ? "white" : "rgba(255,255,255,0.4)" }}>Breathe</button>
+              <button onClick={() => { setPanicMode("ground"); setGroundStep(0); }} style={{ flex: 1, padding: "10px", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", background: panicMode === "ground" ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.05)", color: panicMode === "ground" ? "white" : "rgba(255,255,255,0.4)" }}>Ground</button>
+              <button onClick={() => setPanicMode("sounds")} style={{ flex: 1, padding: "10px", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", background: panicMode === "sounds" ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.05)", color: panicMode === "sounds" ? "white" : "rgba(255,255,255,0.4)" }}>Sounds</button>
+            </div>
+
+            {/* BREATHE TAB */}
             {panicMode === "breathe" && <>
-            {/* Breathing circle */}
-            <div
-              className="breath-circle"
-              style={{
-                width: getCircleSize(),
-                height: getCircleSize(),
-                background: getCircleGradient(),
-                boxShadow: getCircleGlow(),
-              }}
-              onClick={!breathActive ? startBreathing : undefined}
-            >
-              <span style={{ fontSize: 28 }}>
-                {breathPhase === "done" ? "\uD83D\uDC9A" : "\uD83E\uDEC1"}
-              </span>
-            </div>
-
-            {/* Breath instruction text */}
-            <h2 style={{
-              fontFamily: "'Lora', Georgia, serif",
-              fontSize: breathPhase === "done" ? 22 : 26,
-              fontWeight: 600,
-              marginBottom: 8,
-              color: "white",
-            }}>
-              {breathText}
-            </h2>
-
-            {/* Subtext */}
-            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>
-              {breathPhase === "ready" && "5 breaths. You can do this."}
-              {breathPhase === "in" && "4 seconds... fill your lungs slowly"}
-              {breathPhase === "hold" && "4 seconds... you\u2019re doing great"}
-              {breathPhase === "out" && "4 seconds... let it all go"}
-              {breathPhase === "done" && ""}
-            </p>
-
-            {/* Progress dots */}
-            <div className="progress-dots">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="progress-dot"
-                  style={{
-                    background: i < breathCount
-                      ? "linear-gradient(135deg, #FFD700, #F8B4C8)"
-                      : "rgba(255,255,255,0.15)",
-                    boxShadow: i < breathCount ? "0 0 8px rgba(255,215,0,0.5)" : "none",
-                    transform: "scale(1)",
-                  }}
-                />
-              ))}
-            </div>
-
+              <div className="breath-circle" style={{ width: getCircleSize(), height: getCircleSize(), background: getCircleGradient(), boxShadow: getCircleGlow() }} onClick={!breathActive ? startBreathing : undefined}>
+                <span style={{ fontSize: 28 }}>{breathPhase === "done" ? "\uD83D\uDC9A" : "\uD83E\uDEC1"}</span>
+              </div>
+              <h2 style={{ fontFamily: "'Lora', Georgia, serif", fontSize: breathPhase === "done" ? 22 : 26, fontWeight: 600, marginBottom: 8, color: "white" }}>{breathText}</h2>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>
+                {breathPhase === "ready" && "5 breaths. You can do this."}
+                {breathPhase === "in" && "4 seconds... fill your lungs slowly"}
+                {breathPhase === "hold" && "4 seconds... you\u2019re doing great"}
+                {breathPhase === "out" && "4 seconds... let it all go"}
+                {breathPhase === "done" && ""}
+              </p>
+              <div className="progress-dots">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div key={i} className="progress-dot" style={{ background: i < breathCount ? "linear-gradient(135deg, #FFD700, #F8B4C8)" : "rgba(255,255,255,0.15)", boxShadow: i < breathCount ? "0 0 8px rgba(255,215,0,0.5)" : "none" }} />
+                ))}
+              </div>
             </>}
+
+            {/* GROUND TAB */}
             {panicMode === "ground" && <>
-            <div style={{ textAlign: "center" }}>
-              <span style={{ fontSize: 48 }}>{["👁️","✋","👂","👃","👅"][groundStep]}</span>
-              <h2 style={{ fontFamily: "Lora, Georgia, serif", fontSize: 24, fontWeight: 600, color: "white", marginTop: 16, marginBottom: 8 }}>{["Name 5 things you can SEE","Name 4 things you can TOUCH","Name 3 things you can HEAR","Name 2 things you can SMELL","Name 1 thing you can TASTE"][groundStep]}</h2>
-              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>{["Look around slowly. What catches your eye?","Feel textures near you. What do you notice?","Close your eyes. What sounds surround you?","Breathe in. What scents are nearby?","What taste lingers in your mouth?"][groundStep]}</p>
-              <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 20 }}>{[5,4,3,2,1].map(function(n,i) { return <div key={i} style={{ width: 12, height: 12, borderRadius: "50%", background: i <= groundStep ? "linear-gradient(135deg, #FFD700, #F8B4C8)" : "rgba(255,255,255,0.15)" }}></div>; })}</div>
-              {groundStep < 4 ? <button onClick={function() { setGroundStep(groundStep + 1); }} style={{ padding: "14px 32px", background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 14, color: "white", fontFamily: "DM Sans, sans-serif", fontWeight: 600, fontSize: 15, cursor: "pointer" }}>Next</button> : <p style={{ fontSize: 18, color: "white", fontWeight: 600 }}>You did it. You are here. You are safe.</p>}
-            </div>
+              <div style={{ textAlign: "center" }}>
+                <span style={{ fontSize: 48 }}>{["\uD83D\uDC41\uFE0F", "\u270B", "\uD83D\uDC42", "\uD83D\uDC43", "\uD83D\uDC45"][groundStep]}</span>
+                <h2 style={{ fontFamily: "Lora, Georgia, serif", fontSize: 24, fontWeight: 600, color: "white", marginTop: 16, marginBottom: 8 }}>{["Name 5 things you can SEE", "Name 4 things you can TOUCH", "Name 3 things you can HEAR", "Name 2 things you can SMELL", "Name 1 thing you can TASTE"][groundStep]}</h2>
+                <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>{["Look around slowly. What catches your eye?", "Feel textures near you. What do you notice?", "Close your eyes. What sounds surround you?", "Breathe in. What scents are nearby?", "What taste lingers in your mouth?"][groundStep]}</p>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 20 }}>
+                  {[5, 4, 3, 2, 1].map(function(n, i) {
+                    return <div key={i} style={{ width: 12, height: 12, borderRadius: "50%", background: i <= groundStep ? "linear-gradient(135deg, #FFD700, #F8B4C8)" : "rgba(255,255,255,0.15)" }}></div>;
+                  })}
+                </div>
+                {groundStep < 4 ? (
+                  <button onClick={function() { setGroundStep(groundStep + 1); }} style={{ padding: "14px 32px", background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 14, color: "white", fontFamily: "DM Sans, sans-serif", fontWeight: 600, fontSize: 15, cursor: "pointer" }}>Next</button>
+                ) : (
+                  <p style={{ fontSize: 18, color: "white", fontWeight: 600 }}>You did it. You are here. You are safe.</p>
+                )}
+              </div>
             </>}
+
+            {/* SOUNDS TAB */}
+            {panicMode === "sounds" && <>
+              <div style={{ marginBottom: 20 }}>
+                <h2 style={{ fontFamily: "'Lora', Georgia, serif", fontSize: 22, fontWeight: 600, color: "white", marginBottom: 6 }}>Healing Sounds</h2>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>Tap a sound to play. Use headphones for binaural beats.</p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+                {HEALING_SOUNDS.map((sound) => (
+                  <div key={sound.id} className={`sound-card ${activeSound === sound.id ? "active sound-playing" : ""}`} onClick={() => toggleSound(sound)}>
+                    <div style={{ fontSize: 28, flexShrink: 0, width: 40, textAlign: "center" }}>{sound.emoji}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: 15, color: "white", marginBottom: 2 }}>
+                        {sound.name}
+                        {activeSound === sound.id && <span style={{ marginLeft: 8, fontSize: 11, color: "#5BA68A" }}>&#9654; Playing</span>}
+                      </div>
+                      <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>{sound.description}</div>
+                    </div>
+                    {activeSound === sound.id && (
+                      <div style={{ width: 24, height: 24, borderRadius: "50%", background: "rgba(232,83,74,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <span style={{ fontSize: 10, color: "#E8534A" }}>&#9632;</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "0 4px" }}>
+                <span style={{ fontSize: 14, color: "rgba(255,255,255,0.3)" }}>{"\uD83D\uDD07"}</span>
+                <input type="range" className="volume-slider" min="0" max="1" step="0.05" value={soundVolume} onChange={(e) => updateVolume(parseFloat(e.target.value))} />
+                <span style={{ fontSize: 14, color: "rgba(255,255,255,0.3)" }}>{"\uD83D\uDD0A"}</span>
+              </div>
+              {activeSound && (
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", marginTop: 12, fontStyle: "italic" }}>Sound continues while you use other tabs</p>
+              )}
+            </>}
+
             {/* Safety message */}
-            <p style={{
-              fontSize: 16,
-              color: "rgba(255,255,255,0.7)",
-              fontWeight: 500,
-              marginBottom: 28,
-              fontStyle: "italic",
-            }}>
+            <p style={{ fontSize: 16, color: "rgba(255,255,255,0.7)", fontWeight: 500, marginBottom: 28, fontStyle: "italic", marginTop: 24 }}>
               You are safe. This will pass.
             </p>
 
             {/* Action buttons */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <a href="tel:988" style={{
-                display: "block",
-                padding: "14px",
-                background: "linear-gradient(135deg, #E8534A, #D4403A)",
-                color: "white",
-                borderRadius: 14,
-                fontWeight: 600,
-                fontSize: 15,
-                textDecoration: "none",
-                fontFamily: "'DM Sans', sans-serif",
-              }}>
-                Call 988 \u2014 Crisis Lifeline
+              <a href="tel:988" style={{ display: "block", padding: "14px", background: "linear-gradient(135deg, #E8534A, #D4403A)", color: "white", borderRadius: 14, fontWeight: 600, fontSize: 15, textDecoration: "none", fontFamily: "'DM Sans', sans-serif" }}>
+                Call 988 {"\u2014"} Crisis Lifeline
               </a>
-              <a href="sms:741741&body=HELLO" style={{
-                display: "block",
-                padding: "14px",
-                background: "rgba(255,255,255,0.08)",
-                color: "white",
-                borderRadius: 14,
-                fontWeight: 600,
-                fontSize: 15,
-                textDecoration: "none",
-                fontFamily: "'DM Sans', sans-serif",
-                border: "1px solid rgba(255,255,255,0.15)",
-              }}>
+              <a href="sms:741741&body=HELLO" style={{ display: "block", padding: "14px", background: "rgba(255,255,255,0.08)", color: "white", borderRadius: 14, fontWeight: 600, fontSize: 15, textDecoration: "none", fontFamily: "'DM Sans', sans-serif", border: "1px solid rgba(255,255,255,0.15)" }}>
                 Text HOME to 741741
               </a>
-              <button
-                onClick={handleClosePanic}
-                style={{
-                  padding: "14px",
-                  background: "transparent",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 14,
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontWeight: 600,
-                  fontSize: 15,
-                  color: "rgba(255,255,255,0.4)",
-                  cursor: "pointer",
-                  marginTop: 4,
-                }}
-              >
-                I&apos;m feeling better — return to BALM
+              <button onClick={handleClosePanic} style={{ padding: "14px", background: "transparent", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 15, color: "rgba(255,255,255,0.4)", cursor: "pointer", marginTop: 4 }}>
+                I&apos;m feeling better {"\u2014"} return to BALM
               </button>
             </div>
           </div>
@@ -487,51 +554,52 @@ export default function Chat() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <button onClick={() => setShowMenu(!showMenu)} style={{ padding: "8px 12px", background: "transparent", border: "1px solid rgba(27,107,74,0.2)", borderRadius: 8, cursor: "pointer", fontSize: 18 }}>{"\u2630"}</button>
-          {showMenu && <div style={{ position: "absolute", top: 60, right: 16, background: "white", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", padding: 8, zIndex: 100, minWidth: 180 }}>
-            <button onClick={() => { router.push("/"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Home</button>
-            <button onClick={() => { router.push("/community"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Community</button>
-            <button onClick={() => { router.push("/news"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>News</button>
-            <button onClick={() => { router.push("/settings"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Settings</button>
-            {["self","parent"].includes(String(getProfile()?.userRole)) && <button onClick={() => { router.push("/safety-circle"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#E8534A", borderRadius: 8 }}>Safety Circle</button>}
-          </div>}
-          {["self","parent"].includes(String(getProfile()?.userRole)) && <button className="panic-btn" onClick={() => { setShowPanic(true); var p = getProfile(); if (profileId) { fetch("/api/panic-alert", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ profileId: profileId, userName: p ? p.firstName : "Someone" }) }); } }}>
-            {"\uD83C\uDD98"} Panic Button
-          </button>}
+          {showMenu && (
+            <div style={{ position: "absolute", top: 60, right: 16, background: "white", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", padding: 8, zIndex: 100, minWidth: 180 }}>
+              <button onClick={() => { router.push("/"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Home</button>
+              <button onClick={() => { router.push("/community"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Community</button>
+              <button onClick={() => { router.push("/tracker"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Symptom Tracker</button>
+              <button onClick={() => { router.push("/progress"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Progress Chart</button>
+              <button onClick={() => { router.push("/news"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>News</button>
+              <button onClick={() => { router.push("/settings"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1a1a1a", borderRadius: 8 }}>Settings</button>
+              <button onClick={() => { router.push("/privacy"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#5BA68A", borderRadius: 8 }}>Privacy Policy</button>
+              {["self", "parent"].includes(String(getProfile()?.userRole)) && (
+                <button onClick={() => { router.push("/safety-circle"); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "12px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#E8534A", borderRadius: 8 }}>Safety Circle</button>
+              )}
+            </div>
+          )}
+          {["self", "parent"].includes(String(getProfile()?.userRole)) && (
+            <button className="panic-btn" onClick={() => {
+              setShowPanic(true);
+              var p = getProfile();
+              if (profileId) {
+                fetch("/api/panic-alert", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ profileId: profileId, userName: p ? p.firstName : "Someone" })
+                });
+              }
+            }}>
+              {"\uD83C\uDD98"} Panic Button
+            </button>
+          )}
         </div>
       </div>
 
       {/* MESSAGES */}
       <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 16 }}>
         {messages.map((msg) => (
-          <div
-            key={msg.id}
-            style={{
-              display: "flex",
-              justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-              alignItems: "flex-end",
-              gap: 8,
-            }}
-          >
+          <div key={msg.id} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 8 }}>
             {msg.role === "assistant" && (
               <div style={{ width: 28, height: 28, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <span style={{ color: "white", fontSize: 12 }}>{"\u2726"}</span>
               </div>
             )}
-            <div
-              className="message-bubble"
-              style={{
-                background: msg.role === "user" ? BALM_GREEN : "white",
-                color: msg.role === "user" ? "white" : DEEP_FOREST,
-                borderBottomRightRadius: msg.role === "user" ? 4 : 20,
-                borderBottomLeftRadius: msg.role === "assistant" ? 4 : 20,
-                boxShadow: msg.role === "assistant" ? "0 2px 8px rgba(13,40,24,0.04)" : "none",
-              }}
-            >
+            <div className="message-bubble" style={{ background: msg.role === "user" ? BALM_GREEN : "white", color: msg.role === "user" ? "white" : DEEP_FOREST, borderBottomRightRadius: msg.role === "user" ? 4 : 20, borderBottomLeftRadius: msg.role === "assistant" ? 4 : 20, boxShadow: msg.role === "assistant" ? "0 2px 8px rgba(13,40,24,0.04)" : "none" }}>
               <span dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>") }} />
             </div>
           </div>
         ))}
-
         {isLoading && (
           <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
             <div style={{ width: 28, height: 28, borderRadius: "50%", background: BALM_GREEN, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -544,7 +612,6 @@ export default function Chat() {
             </div>
           </div>
         )}
-
         <div ref={messagesEndRef} />
       </div>
 
@@ -564,11 +631,7 @@ export default function Chat() {
             }}
             onKeyDown={handleKeyDown}
           />
-          <button
-            className="send-btn"
-            disabled={input.trim() === "" || isLoading}
-            onClick={handleSend}
-          >
+          <button className="send-btn" disabled={input.trim() === "" || isLoading} onClick={handleSend}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="22" y1="2" x2="11" y2="13"></line>
               <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -582,4 +645,3 @@ export default function Chat() {
     </div>
   );
 }
-

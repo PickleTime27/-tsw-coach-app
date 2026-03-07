@@ -7,5 +7,7 @@ export async function POST(request: NextRequest) {
     await new Promise(r => setTimeout(r, 500));
     if (password !== adminPassword) return NextResponse.json({ message: "Incorrect password." }, { status: 401 });
     return NextResponse.json({ verified: true });
-  } catch { return NextResponse.json({ message: "Server error." }, { status: 500 }); }
+  } catch {
+    return NextResponse.json({ message: "Server error." }, { status: 500 });
+  }
 }
